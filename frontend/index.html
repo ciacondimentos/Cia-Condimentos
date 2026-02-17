@@ -339,10 +339,28 @@ async function filterProducts(category, button) {
   await renderProducts();
 }
 
+async function handleSearch(query) {
+  currentSearch = query.toLowerCase();
+  await renderProducts();
+}
+
 async function renderProducts() {
   const products = await getProducts();
-  const filtered = products.filter(p => p.active && (currentFilter === 'all' || p.category === currentFilter));
-  const container = document.getElementById('productsList');
+  let filtered = products.filter(p => p.active && (currentFilter === 'all' || p.category === currentFilter));
+  
+  // Aplicar filtro de busca se houver
+  if (currentSearch) {
+    filtered = filtered.filter(p => 
+      p.name.toLowerCase().includes(currentSearch) || 
+      p.description.toLowerCase().includes(currentSearch)
+    );
+  }
+  
+  const container = document.getElementById('productsGrid');
+  if (!container) {
+    console.error('Elemento productsGrid não encontrado no DOM');
+    return;
+  }
   
   if (filtered.length === 0) {
     container.innerHTML = '<div class="no-products"><span class="icon">🌶️</span><p>Nenhum produto disponível nesta categoria</p></div>';
