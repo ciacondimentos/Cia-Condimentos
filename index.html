@@ -387,7 +387,7 @@ function submitOrder(frete) {
       window.addEventListener('storage', () => { renderProducts(); updateAuthUI(); });
 
       /* Authentication (server via API) */
-      const API_BASE = ''; // set to backend base URL if different (e.g. 'https://your-backend.onrender.com')
+      const API_BASE = 'https://cia-condimentos.onrender.com'; // backend no Render
 
       function setToken(t){ localStorage.setItem('cia_token', t); }
       function getToken(){ return localStorage.getItem('cia_token'); }
