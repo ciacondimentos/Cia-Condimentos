@@ -654,6 +654,8 @@ function openAddProduct() {
   editingProductId = null;
   document.getElementById('productModalTitle').textContent = '+ Adicionar Produto';
   document.getElementById('productModalBody').innerHTML = productForm({});
+  // default to URL mode for new products
+  setTimeout(()=>{ try{ switchImageMode('url'); previewImage(''); }catch(e){} }, 20);
   document.getElementById('productModal').classList.add('open');
 }
 
@@ -663,6 +665,20 @@ function openEditProduct(id) {
   if (!p) return;
   document.getElementById('productModalTitle').textContent = '✏️ Editar Produto';
   document.getElementById('productModalBody').innerHTML = productForm(p);
+  // if the product image is a data URL (uploaded), initialize upload mode
+  setTimeout(() => {
+    try{
+      if (p.image && p.image.indexOf('data:image') === 0) {
+        const imgDataEl = document.getElementById('pImageData');
+        if (imgDataEl) imgDataEl.value = p.image;
+        switchImageMode('upload');
+        previewImage(p.image);
+      } else {
+        switchImageMode('url');
+        previewImage(p.image || '');
+      }
+    }catch(e){}
+  }, 50);
   document.getElementById('productModal').classList.add('open');
 }
 
@@ -686,8 +702,23 @@ function productForm(p) {
       <div class="fg"><label>Código de Barras</label><input type="text" id="pBarcode" value="${p.barcode||''}" placeholder="0000000000000"></div>
       <div class="fg"><label>SKU / Referência</label><input type="text" id="pSku" value="${p.sku||''}" placeholder="SKU-001"></div>
     </div>
-    <div class="fg"><label>URL da Imagem</label><input type="url" id="pImage" value="${p.image||''}" placeholder="https://exemplo.com/imagem.jpg" oninput="previewImage(this.value)">
-      <div class="hint">Cole a URL da imagem do produto</div>
+    <div class="fg">
+      <label>Imagem do Produto</label>
+      <div style="display:flex;gap:8px;margin-bottom:8px;">
+        <button type="button" class="btn" onclick="switchImageMode('url')" id="imgModeUrl">Usar URL</button>
+        <button type="button" class="btn" onclick="switchImageMode('upload')" id="imgModeUpload">Fazer upload</button>
+      </div>
+      <div id="imgModeContainer">
+        <div id="imgModeUrlContainer">
+          <input type="url" id="pImage" value="${p.image||''}" placeholder="https://exemplo.com/imagem.jpg" oninput="previewImage(this.value)">
+          <div class="hint">Cole a URL da imagem do produto</div>
+        </div>
+        <div id="imgModeUploadContainer" style="display:none;">
+          <input type="file" id="pImageFile" accept="image/*" onchange="handleImageFile(this.files)">
+          <div class="hint">Envie uma imagem do seu computador (será guardada em base64)</div>
+        </div>
+      </div>
+      <input type="hidden" id="pImageData" value="">
       <div id="imgPreview" style="margin-top:10px">${p.image ? '<img src="'+p.image+'" style="width:100px;height:100px;object-fit:cover;border-radius:8px;border:2px solid #e0d8c8">' : ''}</div>
     </div>
     <div class="fg"><label>Descrição</label><textarea id="pDesc" placeholder="Descrição do produto...">${p.description||''}</textarea></div>
@@ -706,6 +737,30 @@ function previewImage(url) {
   el.innerHTML = url ? '<img src="'+url+'" style="width:100px;height:100px;object-fit:cover;border-radius:8px;border:2px solid #e0d8c8" onerror="this.remove()">' : '';
 }
 
+function switchImageMode(mode){
+  const urlCont = document.getElementById('imgModeUrlContainer');
+  const upCont = document.getElementById('imgModeUploadContainer');
+  const btnUrl = document.getElementById('imgModeUrl');
+  const btnUp = document.getElementById('imgModeUpload');
+  if(mode==='upload'){
+    urlCont.style.display='none'; upCont.style.display='block'; btnUrl.style.opacity=0.7; btnUp.style.opacity=1;
+  } else {
+    urlCont.style.display='block'; upCont.style.display='none'; btnUrl.style.opacity=1; btnUp.style.opacity=0.7;
+  }
+}
+
+function handleImageFile(files){
+  if(!files || files.length===0) return;
+  const f = files[0];
+  const reader = new FileReader();
+  reader.onload = function(e){
+    const dataUrl = e.target.result;
+    document.getElementById('pImageData').value = dataUrl;
+    previewImage(dataUrl);
+  };
+  reader.readAsDataURL(f);
+}
+
 function saveProduct() {
   const name = document.getElementById('pName').value.trim();
   const price = parseFloat(document.getElementById('pPrice').value);
@@ -720,7 +775,7 @@ function saveProduct() {
     origin: document.getElementById('pOrigin').value.trim(),
     barcode: document.getElementById('pBarcode').value.trim(),
     sku: document.getElementById('pSku').value.trim(),
-    image: document.getElementById('pImage').value.trim(),
+    image: (document.getElementById('pImageData').value || document.getElementById('pImage').value || '').trim(),
     description: document.getElementById('pDesc').value.trim(),
     brand: document.getElementById('pBrand').value.trim(),
     expiry: document.getElementById('pExpiry').value.trim(),
