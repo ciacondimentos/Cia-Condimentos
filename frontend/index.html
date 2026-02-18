@@ -231,7 +231,10 @@ let cart = [], currentFilter = 'all', currentSearch = '', currentUser = null;
 async function getProducts() {
   try {
     const response = await fetch(`${API_URL}/products`);
-    if (response.ok) return await response.json();
+    if (response.ok) {
+      const products = await response.json();
+      return products.map(p => ({ ...p, price: parseFloat(p.price) || 0 }));
+    }
   } catch (e) {
     console.error('Erro ao buscar produtos:', e);
     showToast('⚠️ Erro ao carregar produtos');
@@ -343,7 +346,10 @@ function updateCartBadge() {
   if (badge) badge.textContent = cart.reduce((s, i) => s + i.qty, 0);
 }
 function getCartTotal() { return cart.reduce((s, i) => s + i.price * i.qty, 0); }
-function fmt(v) { return 'R$ ' + v.toFixed(2).replace('.', ','); }
+function fmt(v) { 
+  const num = parseFloat(v);
+  return isNaN(num) ? 'R$ 0,00' : 'R$ ' + num.toFixed(2).replace('.', ','); 
+}
 
 function renderCart() {
   const container = document.getElementById('cartItems');

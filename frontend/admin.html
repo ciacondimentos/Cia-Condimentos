@@ -483,13 +483,23 @@ async function getProducts() {
   if (useApi) {
     try {
       const response = await fetch(API_URL + '/products/admin/all');
-      if (response.ok) return await response.json();
+      if (response.ok) {
+        const products = await response.json();
+        return products.map(p => ({ ...p, price: parseFloat(p.price) || 0 }));
+      }
     } catch (e) {
       console.warn('API error, falling back to localStorage');
     }
   }
   const s = localStorage.getItem(STORAGE_KEYS.products);
-  return s ? JSON.parse(s) : [];
+  try {
+    const products = s ? JSON.parse(s) : [];
+    return products.map(p => ({ ...p, price: parseFloat(p.price) || 0 }));
+  } catch (e) {
+    console.warn('Invalid localStorage data, resetting products');
+    localStorage.removeItem(STORAGE_KEYS.products);
+    return [];
+  }
 }
 
 async function saveProducts(products) {
