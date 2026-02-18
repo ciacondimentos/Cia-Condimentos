@@ -4,7 +4,7 @@
   "description": "Backend API para Cia de Condimentos (Autenticação)",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "npm run migrate && node index.js",
     "dev": "nodemon index.js",
     "migrate": "node migrate.js"
   },
