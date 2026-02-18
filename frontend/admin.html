@@ -462,8 +462,8 @@ function getApiUrl() {
   if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.includes('localhost')) {
     return 'http://localhost:3000/api';
   }
-  // Em produção, use a mesma origem do frontend ou configure uma variável de ambiente
-  return window.location.origin.replace(/https?:/, 'https:').replace('spiffy-toffee-4276f3.netlify.app', 'SEU_DOMINIO_API.com') + '/api';
+  // Em produção, usar URL da API no Render
+  return 'https://cia-condimentos.onrender.com/api';
 }
 
 const API_URL = getApiUrl();
