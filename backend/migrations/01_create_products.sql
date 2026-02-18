@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS products (
   price DECIMAL(10, 2) NOT NULL,
   stock INT NOT NULL DEFAULT 0,
   description TEXT,
-  image LONGTEXT,
+  image TEXT,
   barcode VARCHAR(50),
   sku VARCHAR(100),
   weight VARCHAR(100),
