@@ -572,12 +572,33 @@ function openCheckout() {
         <div style="border-top: 2px solid #ddd; padding-top: 8px; margin-top: 8px; font-size: 18px; font-weight: bold; display: flex; justify-content: space-between;"><span>Total:</span><span style="color: var(--vermelho);">${fmt(getCartTotal())}</span></div>
       </div>
       <div class="form-group">
-        <label>Nome Completo</label>
-        <input type="text" id="cName" placeholder="João Silva">
+        <label>Nome Completo *</label>
+        <input type="text" id="cName" placeholder="João Silva" required>
       </div>
       <div class="form-group">
-        <label>E-mail</label>
-        <input type="email" id="cEmail" placeholder="joao@exemplo.com">
+        <label>E-mail *</label>
+        <input type="email" id="cEmail" placeholder="joao@exemplo.com" required>
+      </div>
+      <div class="form-group">
+        <label>Telefone *</label>
+        <input type="text" id="cPhone" placeholder="(81) 99999-9999" required>
+      </div>
+      <div class="form-group">
+        <label>CPF</label>
+        <input type="text" id="cCPF" placeholder="000.000.000-00">
+      </div>
+      <div class="form-group">
+        <label>Endereço Completo *</label>
+        <textarea id="cAddress" placeholder="Rua, número, bairro, cidade - CEP" rows="3" required></textarea>
+      </div>
+      <div class="form-group">
+        <label>Forma de Pagamento</label>
+        <select id="cPayment">
+          <option value="PIX">PIX</option>
+          <option value="Cartão de Crédito">Cartão de Crédito</option>
+          <option value="Cartão de Débito">Cartão de Débito</option>
+          <option value="Boleto">Boleto</option>
+        </select>
       </div>
       <button class="submit-order-btn" onclick="submitOrder()">✓ Confirmar Pedido</button>
     `;
@@ -590,6 +611,22 @@ function openCheckout() {
     modal.style.alignItems = 'center';
     modal.style.justifyContent = 'center';
     console.log('✓ checkoutModal aberto e estilos forçados');
+    
+    // Adicionar formatadores após um pequeno delay para garantir que os elementos existem
+    setTimeout(() => {
+      const phoneInput = document.getElementById('cPhone');
+      const cpfInput = document.getElementById('cCPF');
+      
+      if (phoneInput) {
+        phoneInput.value = '(81) 9';
+        phoneInput.addEventListener('input', formatarTelefone);
+        phoneInput.addEventListener('keydown', protegerPrefixoTelefone);
+      }
+      
+      if (cpfInput) {
+        cpfInput.addEventListener('input', formatarCPF);
+      }
+    }, 0);
   }
 }
 
@@ -605,73 +642,56 @@ function closeCheckout() {
 async function submitOrder() {
   const nameEl = safeGetElement('cName');
   const emailEl = safeGetElement('cEmail');
+  const phoneEl = safeGetElement('cPhone');
+  const cpfEl = safeGetElement('cCPF');
+  const addressEl = safeGetElement('cAddress');
+  const paymentEl = safeGetElement('cPayment');
+  
   const name = nameEl ? nameEl.value.trim() : '';
   const email = emailEl ? emailEl.value.trim() : '';
+  const phone = phoneEl ? phoneEl.value.trim() : '';
+  const cpf = cpfEl ? cpfEl.value.trim() : '';
+  const address = addressEl ? addressEl.value.trim() : '';
+  const payment = paymentEl ? paymentEl.value : 'PIX';
 
-  if (!name || !email) {
-    showToast('Preencha os campos obrigatórios!');
+  if (!name || !email || !phone || !address) {
+    showToast('Preencha todos os campos obrigatórios!');
     return;
   }
 
-  // Preparar dados do pedido
-  const orderData = {
-    customer: {
-      name: name,
-      email: email,
-      phone: '', // Campo opcional por enquanto
-      cpf: '',   // Campo opcional por enquanto
-      address: '' // Campo opcional por enquanto
-    },
-    items: cart.map(item => ({
-      id: item.id,
-      qty: item.qty,
-      price: item.price
-    })),
-    subtotal: getCartTotal(),
-    frete: 0, // Frete grátis por enquanto
-    total: getCartTotal(),
-    payment: 'PIX' // Método de pagamento padrão
-  };
+  // Calcular valores
+  const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  const frete = subtotal > 50 ? 0 : 10; // Frete grátis acima de R$ 50
+  const total = subtotal + frete;
 
   try {
-    console.log('📦 Enviando pedido para API:', orderData);
     const response = await fetch(`${API_URL}/orders`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(orderData)
+      body: JSON.stringify({
+        customer: { name, email, phone, cpf, address },
+        items: cart.map(i => ({ id: i.id, qty: i.qty, price: i.price })),
+        subtotal,
+        frete,
+        total,
+        payment
+      })
     });
 
     if (response.ok) {
-      const result = await response.json();
-      console.log('✅ Pedido criado com sucesso:', result);
-      
-      // Limpar carrinho
+      const order = await response.json();
       cart = [];
       updateCartBadge();
-      
-      // Mostrar confirmação
       const checkoutBody = safeGetElement('checkoutBody');
-      if (checkoutBody) {
-        checkoutBody.innerHTML = `
-          <div style="text-align:center;padding:40px">
-            <span style="font-size:70px">🎉</span>
-            <h3 style="color:var(--vermelho);margin-top:20px">Pedido Confirmado!</h3>
-            <p>Seu pedido #${result.id} foi realizado com sucesso!</p>
-            <p style="font-size:14px;color:#666;margin:10px 0">Você receberá um e-mail de confirmação em breve.</p>
-            <button class="submit-order-btn" onclick="closeCheckout(); renderProducts();">Voltar às Compras</button>
-          </div>
-        `;
-      }
-      
-      showToast('✅ Pedido realizado com sucesso!');
+      if (checkoutBody) checkoutBody.innerHTML = '<div style="text-align:center;padding:40px"><span style="font-size:70px">🎉</span><h3 style="color:var(--vermelho);margin-top:20px">Pedido Confirmado!</h3><p>Pedido #' + order.id + ' realizado com sucesso!</p><button class="submit-order-btn" onclick="closeCheckout(); renderProducts();">Voltar às Compras</button></div>';
+      showToast('Pedido realizado com sucesso!');
     } else {
       const error = await response.json();
-      console.error('❌ Erro ao criar pedido:', error);
-      showToast('❌ Erro ao processar pedido: ' + (error.error || 'Erro desconhecido'));
+      showToast('Erro: ' + (error.error || 'Falha ao enviar pedido'));
     }
-  } catch (error) {
-    console.error('❌ Erro na requisição:', error);
-    showToast('❌ Erro de conexão. Tente novamente.');
+  } catch (e) {
+    console.error('Erro ao enviar pedido:', e);
+    showToast('Erro ao conectar com o servidor');
   }
 }
 

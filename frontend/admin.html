@@ -547,7 +547,7 @@ async function saveProducts(products) {
 
 async function getOrders() {
   try {
-    const response = await fetch('/api/orders');
+    const response = await fetch(`${API_URL}/orders`);
     if (!response.ok) throw new Error('Erro ao buscar pedidos do backend');
     return await response.json();
   } catch (e) {
@@ -1285,32 +1285,6 @@ async function deleteProduct(id) {
 }
 
 // ===== ORDERS TABLE =====
-
-// ===== ORDER MODAL =====
-let editingOrderId = null;
-
-
-function closeOrderModal() { document.getElementById('orderModal').classList.remove('open'); }
-
-function saveOrderStatus() {
-  const orders = getOrders();
-  const idx = orders.findIndex(o => o.id === editingOrderId);
-  if (idx === -1) return;
-
-  const newStatus = document.getElementById('editOrderStatus').value;
-  const newPayment = document.getElementById('editPaymentStatus').value;
-  orders[idx].status = newStatus;
-  orders[idx].paymentStatus = newPayment;
-  orders[idx].updatedAt = new Date().toISOString();
-
-  saveOrders(orders);
-  closeOrderModal();
-  renderOrdersTable().catch(e => console.error(e));
-  renderDashboard().catch(e => console.error(e));
-  showToast('✅ Pedido atualizado: ' + newStatus + ' / ' + newPayment);
-}
-
-// ===== ORDERS TABLE =====
 async function renderOrdersTable() {
   const search = document.getElementById('orderSearch').value.toLowerCase();
   const statusFilter = document.getElementById('orderStatusFilter').value;
@@ -1351,18 +1325,10 @@ async function renderOrdersTable() {
   `).join('');
 }
 
-// ===== ORDER MODAL =====
-let editingOrderId = null;
-
 async function openOrderModal(id) {
   editingOrderId = id;
-  const orders = await getOrders();
-  const order = orders.find(o => o.id == id);
-  
-  if (!order) {
-    showToast('❌ Pedido não encontrado');
-    return;
-  }
+  const order = (await getOrders()).find(o => o.id == id);
+  if (!order) return;
 
   document.getElementById('orderModalTitle').textContent = '📦 Pedido ' + id;
   document.getElementById('orderModalBody').innerHTML = `
@@ -1370,86 +1336,84 @@ async function openOrderModal(id) {
       <div class="order-detail-grid">
         <div class="detail-section">
           <h4>👤 Dados do Cliente</h4>
-          <div class="detail-row"><span>Nome</span><strong>${order.customer_name || '—'}</strong></div>
-          <div class="detail-row"><span>E-mail</span><strong>${order.customer_email || '—'}</strong></div>
-          <div class="detail-row"><span>Telefone</span><strong>${order.customer_phone || '—'}</strong></div>
-          <div class="detail-row"><span>CPF</span><strong>${order.customer_cpf || '—'}</strong></div>
-          <div class="detail-row"><span>Endereço</span><strong>${order.customer_address || '—'}</strong></div>
+          <div class="detail-row"><span>Nome</span><strong>${order.customer_name||'—'}</strong></div>
+          <div class="detail-row"><span>E-mail</span><strong>${order.customer_email||'—'}</strong></div>
+          <div class="detail-row"><span>Telefone</span><strong>${order.customer_phone||'—'}</strong></div>
+          <div class="detail-row"><span>CPF</span><strong>${order.customer_cpf||'—'}</strong></div>
+          <div class="detail-row"><span>Endereço</span><strong>${order.customer_address||'—'}</strong></div>
         </div>
         <div class="detail-section">
           <h4>💳 Dados do Pedido</h4>
           <div class="detail-row"><span>Pedido</span><strong>${order.id}</strong></div>
           <div class="detail-row"><span>Data</span><strong>${fmtDate(order.created_at)}</strong></div>
-          <div class="detail-row"><span>Pagamento</span><strong>${order.payment_method || '—'}</strong></div>
-          <div class="detail-row"><span>Subtotal</span><strong>${fmt(order.subtotal || 0)}</strong></div>
-          <div class="detail-row"><span>Frete</span><strong>${order.frete === 0 ? 'Grátis' : fmt(order.frete || 0)}</strong></div>
-          <div class="detail-row"><span>Total</span><strong style="color:var(--vermelho)">${fmt(order.total || 0)}</strong></div>
+          <div class="detail-row"><span>Pagamento</span><strong>${order.payment_method||'—'}</strong></div>
+          <div class="detail-row"><span>Subtotal</span><strong>${fmt(order.subtotal||0)}</strong></div>
+          <div class="detail-row"><span>Frete</span><strong>${order.frete===0?'Grátis':fmt(order.frete||0)}</strong></div>
+          <div class="detail-row"><span>Total</span><strong style="color:var(--vermelho)">${fmt(order.total||0)}</strong></div>
         </div>
       </div>
 
       <h4 style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--vermelho);margin-bottom:10px">🛒 Itens do Pedido</h4>
       <table class="order-items-table">
         <thead><tr><th>Produto</th><th>Qtd</th><th>Preço Unit.</th><th>Total</th></tr></thead>
-        <tbody>${
-          (order.items || []).map(item => `
-            <tr>
-              <td><strong>Produto #${item.product_id}</strong></td>
-              <td>${item.quantity}</td>
-              <td>${fmt(item.price)}</td>
-              <td>${fmt(item.price * item.quantity)}</td>
-            </tr>
-          `).join('')
-        }</tbody>
+        <tbody>${(order.items||[]).map(i => `
+          <tr>
+            <td><strong>${i.name || 'Produto #' + i.product_id}</strong></td>
+            <td>${i.quantity}</td>
+            <td>${fmt(i.price)}</td>
+            <td>${fmt(i.price * i.quantity)}</td>
+          </tr>
+        `).join('')}</tbody>
       </table>
 
       <div class="control-group">
         <label>Status do Pedido:</label>
         <select id="editOrderStatus">
-          ${['Pendente','Processando','Enviado','Entregue','Cancelado'].map(s => `<option value="${s}" ${order.status === s ? 'selected' : ''}>${s}</option>`).join('')}
+          ${['Pendente','Processando','Enviado','Entregue','Cancelado'].map(s => `<option value="${s}" ${order.status===s?'selected':''}>${s}</option>`).join('')}
         </select>
         <label style="margin-left:20px">Status do Pagamento:</label>
         <select id="editPaymentStatus">
-          ${['Aguardando','Pago','Estornado'].map(s => `<option value="${s}" ${order.payment_status === s ? 'selected' : ''}>${s}</option>`).join('')}
+          ${['Aguardando','Pago','Estornado'].map(s => `<option value="${s}" ${order.payment_status===s?'selected':''}>${s}</option>`).join('')}
         </select>
       </div>
     </div>
   `;
-  
   document.getElementById('orderModal').classList.add('open');
 }
 
-function closeOrderModal() { 
-  document.getElementById('orderModal').classList.remove('open'); 
-}
+// ===== ORDER MODAL =====
+let editingOrderId = null;
+
+
+function closeOrderModal() { document.getElementById('orderModal').classList.remove('open'); }
 
 async function saveOrderStatus() {
-  const orders = await getOrders();
-  const idx = orders.findIndex(o => o.id == editingOrderId);
-  if (idx === -1) return;
-
   const newStatus = document.getElementById('editOrderStatus').value;
   const newPayment = document.getElementById('editPaymentStatus').value;
-  orders[idx].status = newStatus;
-  orders[idx].payment_status = newPayment;
-  orders[idx].updated_at = new Date().toISOString();
 
-  // Atualizar no backend
   try {
-    await fetch(`/api/orders/${editingOrderId}`, {
+    const response = await fetch(`${API_URL}/orders/${editingOrderId}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: newStatus, payment_status: newPayment })
+      body: JSON.stringify({
+        status: newStatus,
+        payment_status: newPayment
+      })
     });
+
+    if (response.ok) {
+      closeOrderModal();
+      renderOrdersTable().catch(e => console.error(e));
+      renderDashboard().catch(e => console.error(e));
+      showToast('✅ Pedido atualizado: ' + newStatus + ' / ' + newPayment);
+    } else {
+      const error = await response.json();
+      showToast('❌ Erro: ' + (error.error || 'Falha ao atualizar'));
+    }
   } catch (e) {
     console.error('Erro ao atualizar pedido:', e);
-    showToast('❌ Erro ao salvar alterações');
-    return;
+    showToast('❌ Erro ao conectar com o servidor');
   }
-
-  closeOrderModal();
-  renderOrdersTable().catch(e => console.error(e));
-  renderDashboard().catch(e => console.error(e));
-  showToast('✅ Pedido atualizado: ' + newStatus + ' / ' + newPayment);
 }
 
 // ===== REPORTS =====
