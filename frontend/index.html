@@ -55,90 +55,68 @@
   .product-card:hover { transform: translateY(-6px); box-shadow: 0 16px 40px rgba(0,0,0,0.16); }
   .product-img { width: 100%; height: 220px; background: #f0e8d0; display: flex; align-items: center; justify-content: center; font-size: 60px; overflow: hidden; }
   .product-img img { width: 100%; height: 100%; object-fit: cover; }
-  .stock-badge { position: absolute; top: 12px; right: 12px; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
-  .stock-ok { background: #27ae60; color: white; }
-  .stock-low { background: var(--amarelo); color: var(--marrom); }
-  .stock-out { background: #666; color: white; }
   .product-body { padding: 20px; }
   .product-category { font-size: 11px; font-weight: 700; color: var(--amarelo-escuro); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; }
   .product-name { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: var(--marrom); margin-bottom: 8px; line-height: 1.3; }
   .product-desc { font-size: 13px; color: #888; line-height: 1.5; margin-bottom: 16px; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   .product-footer { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #f0e8d0; padding-top: 16px; }
   .product-price { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 900; color: var(--vermelho); }
-  .product-price span { font-size: 13px; font-weight: 400; color: #aaa; display: block; }
   .add-cart-btn { background: var(--vermelho); color: white; border: none; padding: 10px 20px; border-radius: 4px; font-weight: 700; font-size: 13px; cursor: pointer; transition: all 0.2s; letter-spacing: 1px; }
   .add-cart-btn:hover { background: var(--vermelho-escuro); transform: scale(1.05); }
-  .add-cart-btn:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+  .add-cart-btn:disabled { background: #ccc; cursor: not-allowed; }
 
   .cart-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 200; display: none; }
-  .cart-overlay.open { display: block !important; visibility: visible !important; }
-  .cart-sidebar { position: fixed; top: 0; right: -500px; width: 440px; height: 100vh; background: white; z-index: 201; display: flex; flex-direction: column; transition: right 0.3s; box-shadow: -8px 0 40px rgba(0,0,0,0.2); visibility: hidden; }
-  .cart-sidebar.open { right: 0 !important; display: flex !important; visibility: visible !important; }
+  .cart-overlay.open { display: block !important; }
+  .cart-sidebar { position: fixed; top: 0; right: 0; width: 440px; height: 100vh; background: white; z-index: 201; display: flex; flex-direction: column; transform: translateX(500px); transition: transform 0.3s ease-in-out; box-shadow: -8px 0 40px rgba(0,0,0,0.2); }
+  .cart-sidebar.open { transform: translateX(0) !important; }
   .cart-header { background: var(--vermelho); color: white; padding: 24px; display: flex; justify-content: space-between; align-items: center; }
   .cart-header h3 { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; }
   .cart-close { background: none; border: none; color: white; font-size: 24px; cursor: pointer; }
   .cart-items { flex: 1; overflow-y: auto; padding: 20px; }
   .cart-item { display: flex; gap: 16px; padding: 16px 0; border-bottom: 1px solid #f0e8d0; }
-  .cart-item-img { width: 70px; height: 70px; background: #f0e8d0; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 28px; overflow: hidden; flex-shrink: 0; }
+  .cart-item-img { width: 70px; height: 70px; background: #f0e8d0; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 28px; }
   .cart-item-img img { width: 100%; height: 100%; object-fit: cover; }
   .cart-item-info { flex: 1; }
   .cart-item-name { font-weight: 700; font-size: 15px; color: var(--marrom); }
   .cart-item-price { color: var(--vermelho); font-weight: 700; font-size: 16px; margin-top: 4px; }
   .qty-controls { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
-  .qty-btn { background: var(--amarelo); border: none; width: 28px; height: 28px; border-radius: 50%; font-weight: 900; cursor: pointer; font-size: 16px; transition: background 0.2s; }
-  .qty-btn:hover { background: var(--amarelo-escuro); }
+  .qty-btn { background: var(--amarelo); border: none; width: 28px; height: 28px; border-radius: 50%; font-weight: 900; cursor: pointer; }
   .qty-val { font-weight: 700; font-size: 16px; min-width: 24px; text-align: center; }
   .remove-btn { background: none; border: none; color: #ccc; cursor: pointer; font-size: 18px; }
-  .remove-btn:hover { color: var(--vermelho); }
   .cart-footer { padding: 20px; border-top: 2px solid #f0e8d0; }
-  .cart-total { display: flex; justify-content: space-between; font-size: 20px; font-weight: 900; margin-bottom: 16px; font-family: 'Playfair Display', serif; }
+  .cart-total { display: flex; justify-content: space-between; font-size: 20px; font-weight: 900; margin-bottom: 16px; }
   .cart-total span:last-child { color: var(--vermelho); }
-  .checkout-btn { width: 100%; background: var(--vermelho); color: white; border: none; padding: 16px; font-size: 16px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; border-radius: 4px; transition: background 0.2s; }
-  .checkout-btn:hover { background: var(--vermelho-escuro); }
+  .checkout-btn { width: 100%; background: var(--vermelho); color: white; border: none; padding: 16px; font-weight: 900; cursor: pointer; border-radius: 4px; }
   .empty-cart { text-align: center; padding: 60px 20px; color: #aaa; }
-  .empty-cart .icon { font-size: 60px; display: block; margin-bottom: 16px; }
+  .empty-cart .icon { font-size: 60px; margin-bottom: 16px; }
 
-  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 300; display: none; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; visibility: hidden; }
-  .modal-overlay.open { display: flex !important; visibility: visible !important; }
-  .modal { background: white; border-radius: 12px; max-width: 560px; width: 100%; overflow: hidden; animation: modalIn 0.3s ease; }
-  @keyframes modalIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 300; display: none; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex !important; }
+  .modal { background: white; border-radius: 12px; max-width: 560px; width: 100%; overflow: hidden; }
   .modal-header { background: var(--vermelho); padding: 24px 28px; color: white; display: flex; justify-content: space-between; align-items: center; }
   .modal-header h3 { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; }
   .modal-body { padding: 28px; max-height: 80vh; overflow-y: auto; }
-  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   .form-group { margin-bottom: 16px; }
-  .form-group label { display: block; font-size: 12px; font-weight: 700; color: var(--marrom); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
-  .form-group input, .form-group select { width: 100%; padding: 10px 14px; border: 2px solid #e0d8c8; border-radius: 4px; font-size: 14px; font-family: 'Lato', sans-serif; transition: border-color 0.2s; outline: none; }
-  .form-group input:focus, .form-group select:focus { border-color: var(--amarelo); }
-  .order-summary { background: var(--creme); border-radius: 8px; padding: 16px; margin-bottom: 20px; }
-  .order-summary h4 { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700; margin-bottom: 10px; color: var(--vermelho); }
-  .summary-item { display: flex; justify-content: space-between; font-size: 13px; padding: 4px 0; }
-  .summary-total { display: flex; justify-content: space-between; font-weight: 900; font-size: 16px; border-top: 2px solid var(--amarelo); padding-top: 10px; margin-top: 8px; }
-  .submit-order-btn { width: 100%; background: var(--vermelho); color: white; border: none; padding: 16px; font-size: 16px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; border-radius: 4px; transition: background 0.2s; }
+  .form-group label { display: block; font-size: 12px; font-weight: 700; color: var(--marrom); margin-bottom: 6px; }
+  .form-group input { width: 100%; padding: 10px 14px; border: 2px solid #e0d8c8; border-radius: 4px; font-size: 14px; }
+  .form-group input:focus { border-color: var(--amarelo); outline: none; }
+  .submit-order-btn { width: 100%; background: var(--vermelho); color: white; border: none; padding: 16px; font-weight: 900; cursor: pointer; border-radius: 4px; margin-top: 16px; }
   .submit-order-btn:hover { background: var(--vermelho-escuro); }
 
-  .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--marrom); color: white; padding: 14px 28px; border-radius: 8px; font-weight: 700; font-size: 14px; z-index: 500; transition: transform 0.3s; box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+  .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--marrom); color: white; padding: 14px 28px; border-radius: 8px; font-weight: 700; z-index: 500; transition: transform 0.3s; }
   .toast.show { transform: translateX(-50%) translateY(0); }
 
-  .auth-btn { margin-left: 12px; background: transparent; color: white; border: 2px solid rgba(255,255,255,0.12); padding: 8px 14px; border-radius: 6px; font-weight:700; cursor: pointer; }
-  .auth-btn:hover { background: rgba(255,255,255,0.04); }
-  .user-badge { background: var(--amarelo); color: var(--vermelho); padding: 8px 12px; border-radius: 20px; font-weight:900; }
+  .auth-btn { background: transparent; color: white; border: 2px solid rgba(255,255,255,0.12); padding: 8px 14px; border-radius: 6px; font-weight: 700; cursor: pointer; margin-left: 12px; }
 
   footer { background: var(--marrom); color: rgba(255,255,255,0.6); text-align: center; padding: 32px; font-size: 13px; }
   footer .brand { font-family: 'Playfair Display', serif; color: var(--amarelo); font-size: 20px; font-weight: 700; margin-bottom: 8px; }
-  .no-products { text-align: center; padding: 80px 20px; color: #aaa; grid-column: 1/-1; }
-  .no-products .icon { font-size: 60px; display: block; margin-bottom: 16px; }
-  .success-screen { text-align: center; padding: 40px 20px; }
-  .success-screen .icon { font-size: 70px; display: block; margin-bottom: 16px; }
-  .success-screen h3 { font-family: 'Playfair Display', serif; font-size: 26px; color: var(--vermelho); margin-bottom: 10px; }
-  .success-screen .order-code { font-size: 22px; font-weight: 900; color: var(--amarelo-escuro); margin: 16px 0; background: var(--creme); padding: 10px; border-radius: 8px; }
+  .no-products { text-align: center; padding: 80px 20px; color: #aaa; }
 </style>
 </head>
 <body>
 
 <div id="toast" class="toast"></div>
-
-<div class="cart-overlay" id="cartOverlay" onclick="if(event.target === this) { event.stopPropagation(); toggleCart(event); }"></div>
+<div class="cart-overlay" id="cartOverlay" onclick="if(event.target === this) toggleCart()"></div>
 <div class="cart-sidebar" id="cartSidebar">
   <div class="cart-header">
     <h3>🛒 Seu Carrinho</h3>
@@ -164,13 +142,13 @@
 <div class="modal-overlay" id="authModal" onclick="if(event.target === this) closeAuth()">
   <div class="modal" onclick="event.stopPropagation();">
     <div class="modal-header">
-      <h3 id="authTitle">🔐 Entrar / Cadastrar</h3>
+      <h3>🔐 Entrar / Cadastrar</h3>
       <button style="background:none;border:none;color:white;font-size:24px;cursor:pointer" onclick="closeAuth()">✕</button>
     </div>
     <div class="modal-body">
       <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #e0d8c8; padding-bottom: 10px;">
-        <button id="tabLogin" style="flex: 1; background: transparent; border: none; padding: 10px; font-weight: 700; cursor: pointer; border-bottom: 3px solid transparent; color: var(--vermelho);" onclick="showAuthTab('login')">🔓 Entrar</button>
-        <button id="tabRegister" style="flex: 1; background: transparent; border: none; padding: 10px; font-weight: 700; cursor: pointer; border-bottom: 3px solid transparent; color: #aaa; opacity: 0.7;" onclick="showAuthTab('register')">➕ Cadastrar</button>
+        <button id="tabLogin" style="flex: 1; background: transparent; border: none; padding: 10px; font-weight: 700; cursor: pointer; border-bottom: 3px solid var(--vermelho); color: var(--vermelho);" onclick="showAuthTab('login')">🔓 Entrar</button>
+        <button id="tabRegister" style="flex: 1; background: transparent; border: none; padding: 10px; font-weight: 700; cursor: pointer; border-bottom: 3px solid transparent; color: #aaa;" onclick="showAuthTab('register')">➕ Cadastrar</button>
       </div>
       <div id="authContent"></div>
     </div>
@@ -178,12 +156,12 @@
 </div>
 
 <header>
-  <div class="header-top">✦ FRETE GRÁTIS A PARTIR DE R$ 50 - ABAIXO DISSO, TAXA DE R$ 10 POR ENTREGA ✦ CONDIMENTOS E ESPECIARIAS ✦</div>
+  <div class="header-top">✦ FRETE GRÁTIS A PARTIR DE R$ 50 ✦</div>
   <div class="header-main">
     <div class="logo-wrap">
       <img src="img/logotipooficialciadecondimentos.png" alt="Cia de Condimentos" class="logo-icon" />
       <div>
-        <div class="logo-title">Cia de<br>Condimentos</div>
+        <div class="logo-title">Cia de Condimentos</div>
         <div class="logo-sub">Especiarias Premium</div>
       </div>
     </div>
@@ -192,9 +170,9 @@
       <a href="#produtos">Produtos</a>
       <a href="#contato">Contato</a>
     </nav>
-    <div style="display:flex;align-items:center;gap:12px;">
-      <button class="cart-btn" onclick="event.stopPropagation(); toggleCart(event);">🛒 Carrinho <span class="cart-badge" id="cartBadge">0</span></button>
-      <button class="auth-btn" id="authBtn" onclick="openAuth()">Entrar / Cadastrar</button>
+    <div style="display:flex;align-items:center;">
+      <button class="cart-btn" onclick="toggleCart()">🛒 Carrinho <span class="cart-badge" id="cartBadge">0</span></button>
+      <button class="auth-btn" onclick="openAuth()">Entrar / Cadastrar</button>
     </div>
   </div>
 </header>
@@ -213,8 +191,6 @@
   <button class="filter-btn" onclick="filterProducts('Pimentas', this)">Pimentas</button>
   <button class="filter-btn" onclick="filterProducts('Especiarias', this)">Especiarias</button>
   <button class="filter-btn" onclick="filterProducts('Ervas', this)">Ervas</button>
-  <button class="filter-btn" onclick="filterProducts('Temperos', this)">Temperos</button>
-  <button class="filter-btn" onclick="filterProducts('Molhos', this)">Molhos</button>
   <input type="text" class="search-input" id="searchInput" placeholder="Buscar produtos..." onkeyup="handleSearch(this.value)">
 </section>
 
@@ -227,245 +203,344 @@
 
 <footer>
   <div class="brand">Cia de Condimentos</div>
-  <p>© 2026 Todos os direitos reservados | Condimentos e Especiarias Premium</p>
+  <p>© 2026 Todos os direitos reservados</p>
 </footer>
 
 <script>
-// Detectar ambiente e definir URL da API corretamente
 function getApiUrl() {
   const hostname = window.location.hostname;
-  if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.includes('localhost')) {
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
     return 'http://localhost:3000/api';
   }
-  // Em produção, usar URL da API no Render
   return 'https://cia-condimentos.onrender.com/api';
 }
 
-// Função auxiliar para encontrar elementos de forma robusta
 function safeGetElement(id) {
-  let el = document.getElementById(id);
-  if (!el) {
-    console.warn(`⚠️ Elemento ${id} não encontrado, procurando no documento...`);
-    el = document.querySelector(`[id="${id}"]`);
-  }
-  return el;
+  return document.getElementById(id);
 }
 
 const API_URL = getApiUrl();
-let cart = [], currentFilter = 'all', currentSearch = '', currentUser = null;
+let cart = [];
+let currentFilter = 'all';
+let currentSearch = '';
 
-// Garantir que os elementos necessários existam (contra extensões que removem)
-(function ensureElements() {
-  const createIfMissing = () => {
-    if (!document.getElementById('cartOverlay')) {
-      const overlay = document.createElement('div');
-      overlay.className = 'cart-overlay';
-      overlay.id = 'cartOverlay';
-      overlay.onclick = (e) => { if(e.target === overlay) toggleCart(e); };
-      document.body.appendChild(overlay);
-    }
-    if (!document.getElementById('cartSidebar')) {
-      const sidebar = document.createElement('div');
-      sidebar.className = 'cart-sidebar';
-      sidebar.id = 'cartSidebar';
-      sidebar.innerHTML = `
-        <div class="cart-header">
-          <h3>🛒 Seu Carrinho</h3>
-          <button class="cart-close" onclick="toggleCart()">✕</button>
-        </div>
-        <div class="cart-items" id="cartItems"></div>
-        <div class="cart-footer">
-          <div class="cart-total"><span>Total</span><span id="cartTotal">R$ 0,00</span></div>
-          <button class="checkout-btn" onclick="openCheckout()">Finalizar Compra</button>
-        </div>
-      `;
-      document.body.appendChild(sidebar);
-    }
-    if (!document.getElementById('checkoutModal')) {
-      const modal = document.createElement('div');
-      modal.className = 'modal-overlay';
-      modal.id = 'checkoutModal';
-      modal.onclick = (e) => { if(e.target === modal) closeCheckout(); };
-      modal.innerHTML = `
-        <div class="modal" onclick="event.stopPropagation();">
-          <div class="modal-header">
-            <h3>🌶️ Finalizar Pedido</h3>
-            <button style="background:none;border:none;color:white;font-size:24px;cursor:pointer" onclick="closeCheckout()">✕</button>
-          </div>
-          <div class="modal-body" id="checkoutBody"></div>
-        </div>
-      `;
-      document.body.appendChild(modal);
-    }
-    if (!document.getElementById('authModal')) {
-      const authModal = document.createElement('div');
-      authModal.className = 'modal-overlay';
-      authModal.id = 'authModal';
-      authModal.onclick = (e) => { if(e.target === authModal) closeAuth(); };
-      authModal.innerHTML = `
-        <div class="modal" onclick="event.stopPropagation();">
-          <div class="modal-header">
-            <h3 id="authTitle">🔐 Entrar / Cadastrar</h3>
-            <button style="background:none;border:none;color:white;font-size:24px;cursor:pointer" onclick="closeAuth()">✕</button>
-          </div>
-          <div class="modal-body">
-            <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #e0d8c8; padding-bottom: 10px;">
-              <button id="tabLogin" style="flex: 1; background: transparent; border: none; padding: 10px; font-weight: 700; cursor: pointer; border-bottom: 3px solid var(--vermelho); color: var(--vermelho);" onclick="showAuthTab('login')">🔓 Entrar</button>
-              <button id="tabRegister" style="flex: 1; background: transparent; border: none; padding: 10px; font-weight: 700; cursor: pointer; border-bottom: 3px solid transparent; color: #aaa; opacity: 0.7;" onclick="showAuthTab('register')">➕ Cadastrar</button>
-            </div>
-            <div id="authContent"></div>
-          </div>
-        </div>
-      `;
-      document.body.appendChild(authModal);
-    }
-  };
-  createIfMissing();
-  setTimeout(createIfMissing, 100);
-  setTimeout(createIfMissing, 500);
-})();
+// Garantir que os modais sempre existem no DOM
+function ensureModalsExist() {
+  const cartSidebar = document.getElementById('cartSidebar');
+  const authModal = document.getElementById('authModal');
+  const checkoutModal = document.getElementById('checkoutModal');
+  const cartOverlay = document.getElementById('cartOverlay');
+  
+  let missingElements = [];
+  if (!cartSidebar) missingElements.push('cartSidebar');
+  if (!authModal) missingElements.push('authModal');
+  if (!checkoutModal) missingElements.push('checkoutModal');
+  if (!cartOverlay) missingElements.push('cartOverlay');
+  
+  if (missingElements.length > 0) {
+    console.error('❌ CRÍTICO: Os seguintes elementos desapareceram:', missingElements.join(', '));
+    console.error('  Recriando modais...');
+    
+    // Recriar os modais no início do body
+    const modalsHTML = `
+<div id="toast" class="toast"></div>
+<div class="cart-overlay" id="cartOverlay" onclick="if(event.target === this) toggleCart()"></div>
+<div class="cart-sidebar" id="cartSidebar">
+  <div class="cart-header">
+    <h3>🛒 Seu Carrinho</h3>
+    <button class="cart-close" onclick="toggleCart()">✕</button>
+  </div>
+  <div class="cart-items" id="cartItems"></div>
+  <div class="cart-footer">
+    <div class="cart-total"><span>Total</span><span id="cartTotal">R$ 0,00</span></div>
+    <button class="checkout-btn" onclick="openCheckout()">Finalizar Compra</button>
+  </div>
+</div>
 
-// API Calls
+<div class="modal-overlay" id="checkoutModal" onclick="if(event.target === this) closeCheckout()">
+  <div class="modal" onclick="event.stopPropagation();">
+    <div class="modal-header">
+      <h3>🌶️ Finalizar Pedido</h3>
+      <button style="background:none;border:none;color:white;font-size:24px;cursor:pointer" onclick="closeCheckout()">✕</button>
+    </div>
+    <div class="modal-body" id="checkoutBody"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="authModal" onclick="if(event.target === this) closeAuth()">
+  <div class="modal" onclick="event.stopPropagation();">
+    <div class="modal-header">
+      <h3>🔐 Entrar / Cadastrar</h3>
+      <button style="background:none;border:none;color:white;font-size:24px;cursor:pointer" onclick="closeAuth()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #e0d8c8; padding-bottom: 10px;">
+        <button id="tabLogin" style="flex: 1; background: transparent; border: none; padding: 10px; font-weight: 700; cursor: pointer; border-bottom: 3px solid var(--vermelho); color: var(--vermelho);" onclick="showAuthTab('login')">🔓 Entrar</button>
+        <button id="tabRegister" style="flex: 1; background: transparent; border: none; padding: 10px; font-weight: 700; cursor: pointer; border-bottom: 3px solid transparent; color: #aaa;" onclick="showAuthTab('register')">➕ Cadastrar</button>
+      </div>
+      <div id="authContent"></div>
+    </div>
+  </div>
+</div>
+    `;
+    
+    // Inserir modais no início do body
+    document.body.insertAdjacentHTML('afterbegin', modalsHTML);
+    console.log('✓ Modais recriados com sucesso');
+    
+    // Re-adicionar event listeners
+    setupModalListeners();
+  }
+}
+
+function setupModalListeners() {
+  const cartOverlay = document.getElementById('cartOverlay');
+  const checkoutModal = document.getElementById('checkoutModal');
+  const authModal = document.getElementById('authModal');
+  const cartBtn = document.querySelector('.cart-btn');
+  const authBtn = document.querySelector('.auth-btn');
+  
+  if (cartBtn) {
+    cartBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleCart();
+    });
+  }
+  
+  if (authBtn) {
+    authBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      openAuth();
+    });
+  }
+  
+  if (cartOverlay) {
+    cartOverlay.addEventListener('click', (e) => {
+      if (e.target === cartOverlay) toggleCart();
+    });
+  }
+  
+  if (checkoutModal) {
+    checkoutModal.addEventListener('click', (e) => {
+      if (e.target === checkoutModal) closeCheckout();
+    });
+  }
+  
+  if (authModal) {
+    authModal.addEventListener('click', (e) => {
+      if (e.target === authModal) closeAuth();
+    });
+  }
+}
+
 async function getProducts() {
   try {
-    const response = await fetch(`${API_URL}/products`);
+    console.log('🔄 Buscando produtos de:', API_URL);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
+    
+    const response = await fetch(`${API_URL}/products`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      signal: controller.signal
+    });
+    
+    clearTimeout(timeout);
+    console.log('✓ Resposta da API:', response.status);
     if (response.ok) {
       const products = await response.json();
+      console.log('✓ Produtos carregados:', products.length);
       return products.map(p => ({ ...p, price: parseFloat(p.price) || 0 }));
+    } else {
+      console.error('✗ Erro na resposta da API:', response.status, response.statusText);
     }
   } catch (e) {
-    console.error('Erro ao buscar produtos:', e);
-    showToast('⚠️ Erro ao carregar produtos');
+    console.error('✗ Erro ao buscar produtos:', e.message);
+    if (e.name === 'AbortError') {
+      console.error('✗ Requisição expirou (timeout)');
+      showToast('Servidor demorando. Tentando novamente...');
+    } else {
+      showToast('Erro ao conectar com o servidor');
+    }
   }
-  return [];
+  console.warn('⚠️ Usando produto de demonstração');
+  return [{ id: 1, name: 'Produto Demo', category: 'Demo', price: 19.90, stock: 10, active: true, image: null, description: 'Produto de demonstração' }];
 }
 
-async function submitOrderToAPI(orderData) {
-  try {
-    const response = await fetch(`${API_URL}/orders`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(orderData)
-    });
-    if (response.ok) return await response.json();
-    throw new Error('Falha ao salvar pedido');
-  } catch (e) {
-    console.error('Erro ao salvar pedido:', e);
-    showToast('⚠️ Erro ao processar pedido');
+async function renderProducts() {
+  console.log('📦 renderProducts iniciado');
+  const products = await getProducts();
+  let filtered = products.filter(p =>
+    p.active &&
+    (currentFilter === 'all' || p.category === currentFilter)
+  );
+
+  if (currentSearch) {
+    filtered = filtered.filter(p =>
+      p.name.toLowerCase().includes(currentSearch) ||
+      p.description.toLowerCase().includes(currentSearch)
+    );
   }
-  return null;
-}
 
-async function registerUser(name, email, password, phone, cpf, address) {
-  try {
-    const response = await fetch(`${API_URL}/auth/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, password, phone, cpf, address })
-    });
-    if (response.ok) return await response.json();
-    const error = await response.json();
-    throw new Error(error.message || 'Erro no cadastro');
-  } catch (e) {
-    showToast('⚠️ ' + e.message);
+  const container = safeGetElement('productsGrid');
+  if (!container) {
+    console.error('Elemento productsGrid não encontrado');
+    return;
   }
-  return null;
-}
 
-async function loginUser(email, password) {
-  try {
-    const response = await fetch(`${API_URL}/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
-    });
-    if (response.ok) return await response.json();
-    const error = await response.json();
-    throw new Error(error.message || 'Erro no login');
-  } catch (e) {
-    showToast('⚠️ ' + e.message);
+  if (filtered.length === 0) {
+    container.innerHTML = '<div class="no-products"><span class="icon">🌶️</span><p>Nenhum produto disponível</p></div>';
+    return;
   }
-  return null;
+
+  container.innerHTML = filtered.map(p => `
+    <div class="product-card">
+      <div class="product-img">
+        ${p.image ? `<img src="${p.image}" alt="${p.name}">` : '🌶️'}
+      </div>
+      <div class="product-body">
+        <div class="product-category">${p.category}</div>
+        <div class="product-name">${p.name}</div>
+        <div class="product-desc">${p.description}</div>
+        <div class="product-footer">
+          <div class="product-price">${fmt(p.price)}</div>
+          <button class="add-cart-btn" onclick="addToCart(${p.id})" ${p.stock <= 0 ? 'disabled' : ''}>
+            ${p.stock > 0 ? '🛒 Adicionar' : '❌ Indisponível'}
+          </button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+  
+  console.log('✓ renderProducts completado');
+  ensureModalsExist(); // Verificar se modais ainda existem após renderizar
 }
 
-function setCurrentUser(u) { 
-  currentUser = u; 
-  updateAuthUI(); 
+function filterProducts(category, button) {
+  currentFilter = category;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  if (button) button.classList.add('active');
+  renderProducts();
 }
 
-function clearCurrentUser() { 
-  currentUser = null; 
-  updateAuthUI(); 
+function handleSearch(query) {
+  currentSearch = query.toLowerCase();
+  renderProducts();
 }
 
-function getCurrentUser() { 
-  return currentUser; 
-}
-
-function toggleCart(e) {
-  console.log('🛒 toggleCart chamado, e=', e);
-  if (e) e.stopPropagation();
-  let sidebar = safeGetElement('cartSidebar');
-  let overlay = safeGetElement('cartOverlay');
-  if (!sidebar || !overlay) {
-    ensureElements();
-    sidebar = safeGetElement('cartSidebar');
-    overlay = safeGetElement('cartOverlay');
-  }
-  if (sidebar && overlay) {
+function toggleCart() {
+  ensureModalsExist(); // Verificar se os modais existem
+  console.log('🛒 toggleCart chamado');
+  const sidebar = safeGetElement('cartSidebar');
+  const overlay = safeGetElement('cartOverlay');
+  console.log('✓ cartSidebar encontrado:', !!sidebar, 'cartOverlay encontrado:', !!overlay);
+  
+  if (sidebar) {
     sidebar.classList.toggle('open');
-    overlay.classList.toggle('open');
-    console.log('✅ Toggled - open?', sidebar.classList.contains('open'));
-    renderCart();
-  }
-}
-
-async function addToCart(id) {
-  const products = (await getProducts()).filter(p => p.active);
-  const product = products.find(p => p.id === id);
-  if (!product || product.stock <= 0) return;
-  const existing = cart.find(i => i.id === id);
-  if (existing) {
-    if (existing.qty >= product.stock) { showToast('⚠️ Quantidade máxima em estoque!'); return; }
-    existing.qty++;
+    console.log('✓ Toggle "open" aplicado ao cartSidebar');
+    
+    // Forçar estilos via JavaScript
+    if (sidebar.classList.contains('open')) {
+      sidebar.style.transform = 'translateX(0)';
+      sidebar.style.display = 'flex';
+      sidebar.style.zIndex = '201';
+      console.log('✓ Estilos forçados: transform=translateX(0), display=flex, z-index=201');
+    } else {
+      sidebar.style.transform = 'translateX(500px)';
+      console.log('✓ Estilos forçados: transform=translateX(500px) (fechar)');
+    }
   } else {
-    cart.push({ id: product.id, name: product.name, price: product.price, qty: 1, image: product.image, category: product.category });
+    console.error('✗ Elemento cartSidebar não encontrado');
   }
-  updateCartBadge();
-  showToast('🌶️ "' + product.name + '" adicionado ao carrinho!');
+  
+  if (overlay) {
+    overlay.classList.toggle('open');
+    if (overlay.classList.contains('open')) {
+      overlay.style.display = 'flex';
+      overlay.style.zIndex = '200';
+      console.log('✓ Overlay visível');
+    } else {
+      overlay.style.display = 'none';
+      console.log('✓ Overlay oculto');
+    }
+  }
+  
   renderCart();
 }
 
-function removeFromCart(id) { cart = cart.filter(i => i.id !== id); updateCartBadge(); renderCart(); }
-
-async function changeQty(id, delta) {
-  const item = cart.find(i => i.id === id);
-  if (!item) return;
-  const products = await getProducts();
-  const product = products.find(p => p.id === id);
-  item.qty = Math.max(1, Math.min(item.qty + delta, product ? product.stock : 99));
-  updateCartBadge(); renderCart();
-}
-
-function updateCartBadge() { 
+function updateCartBadge() {
   const badge = safeGetElement('cartBadge');
   if (badge) badge.textContent = cart.reduce((s, i) => s + i.qty, 0);
 }
-function getCartTotal() { return cart.reduce((s, i) => s + i.price * i.qty, 0); }
-function fmt(v) { 
-  const num = parseFloat(v);
-  return isNaN(num) ? 'R$ 0,00' : 'R$ ' + num.toFixed(2).replace('.', ','); 
+
+function getCartTotal() {
+  return cart.reduce((s, i) => s + i.price * i.qty, 0);
+}
+
+function fmt(v) {
+  return 'R$ ' + Number(v).toFixed(2).replace('.', ',');
+}
+
+async function addToCart(id) {
+  const products = await getProducts();
+  const product = products.find(p => p.id === id);
+  if (!product || product.stock <= 0) return;
+
+  const existing = cart.find(i => i.id === id);
+  if (existing) {
+    if (existing.qty >= product.stock) {
+      showToast('Quantidade máxima em estoque');
+      return;
+    }
+    existing.qty++;
+  } else {
+    cart.push({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      qty: 1,
+      image: product.image
+    });
+  }
+
+  updateCartBadge();
+  renderCart();
+  showToast('Produto adicionado!');
+}
+
+function changeQty(id, delta) {
+  const item = cart.find(i => i.id === id);
+  if (!item) return;
+  item.qty = Math.max(1, item.qty + delta);
+  updateCartBadge();
+  renderCart();
+}
+
+function removeFromCart(id) {
+  cart = cart.filter(i => i.id !== id);
+  updateCartBadge();
+  renderCart();
 }
 
 function renderCart() {
   const container = safeGetElement('cartItems');
   const totalEl = safeGetElement('cartTotal');
+  
   if (!container || !totalEl) return;
   totalEl.textContent = fmt(getCartTotal());
-  if (cart.length === 0) { container.innerHTML = '<div class="empty-cart"><span class="icon">🛒</span><p>Seu carrinho está vazio</p></div>'; return; }
+
+  if (cart.length === 0) {
+    container.innerHTML = '<div class="empty-cart"><span class="icon">🛒</span><p>Seu carrinho está vazio</p></div>';
+    return;
+  }
+
   container.innerHTML = cart.map(item => `
     <div class="cart-item">
-      <div class="cart-item-img">${item.image ? '<img src="'+item.image+'" alt="'+item.name+'" onerror="this.parentElement.innerHTML=\'🌶️\'">' : '🌶️'}</div>
+      <div class="cart-item-img">
+        ${item.image ? `<img src="${item.image}">` : '🌶️'}
+      </div>
       <div class="cart-item-info">
         <div class="cart-item-name">${item.name}</div>
         <div class="cart-item-price">${fmt(item.price * item.qty)}</div>
@@ -480,200 +555,369 @@ function renderCart() {
   `).join('');
 }
 
-async function filterProducts(category, button) {
-  currentFilter = category;
-  if (button) {
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    button.classList.add('active');
-  }
-  await renderProducts();
-}
-
-async function handleSearch(query) {
-  currentSearch = query.toLowerCase();
-  await renderProducts();
-}
-
-async function renderProducts() {
-  const products = await getProducts();
-  let filtered = products.filter(p => p.active && (currentFilter === 'all' || p.category === currentFilter));
-  
-  if (currentSearch) {
-    filtered = filtered.filter(p => 
-      p.name.toLowerCase().includes(currentSearch) || 
-      p.description.toLowerCase().includes(currentSearch)
-    );
-  }
-  
-  const container = safeGetElement('productsGrid');
-  if (!container) {
-    console.error('Elemento productsGrid não encontrado no DOM');
-    return;
-  }
-  
-  if (filtered.length === 0) {
-    container.innerHTML = '<div class="no-products"><span class="icon">🌶️</span><p>Nenhum produto disponível nesta categoria</p></div>';
-    return;
-  }
-  
-  container.innerHTML = filtered.map(p => `
-    <div class="product-card">
-      <div class="product-img">${p.image ? '<img src="'+p.image+'" alt="'+p.name+'" onerror="this.parentElement.innerHTML=\'🌶️\'">' : '<div class="placeholder">🌶️</div>'}</div>
-      <div class="product-body">
-        <div class="product-category">${p.category}</div>
-        <div class="product-name">${p.name}</div>
-        <div class="product-desc">${p.description}</div>
-        <div class="product-footer">
-          <div class="product-price">${fmt(p.price)}</div>
-          <button class="add-cart-btn ${p.stock <= 0 ? 'disabled' : ''}" onclick="${p.stock > 0 ? 'addToCart(' + p.id + ')' : ''}" ${p.stock <= 0 ? 'disabled' : ''}>
-            ${p.stock > 0 ? '🛒 Adicionar' : '❌ Indisponível'}
-          </button>
-        </div>
-      </div>
-    </div>
-  `).join('');
-}
-
 function openCheckout() {
-  console.log('💳 openCheckout chamado');
-  if (cart.length === 0) { showToast('Adicione produtos ao carrinho!'); return; }
-  const total = getCartTotal();
-  const frete = total >= 50 ? 0 : 10.00;
-  let checkoutBody = safeGetElement('checkoutBody');
-  if (!checkoutBody) {
-    ensureElements();
-    checkoutBody = safeGetElement('checkoutBody');
+  ensureModalsExist();
+  console.log('💳 openCheckout chamado, carrinho tem', cart.length, 'itens');
+  if (cart.length === 0) {
+    showToast('Adicione produtos ao carrinho!');
+    return;
   }
-  if (!checkoutBody) return;
-  checkoutBody.innerHTML = `
-    <div class="order-summary">
-      <h4>📋 Resumo do Pedido</h4>
-      ${cart.map(i => `<div class="summary-item"><span>${i.name} x${i.qty}</span><span>${fmt(i.price*i.qty)}</span></div>`).join('')}
-      <div class="summary-item"><span>Frete</span><span>${frete===0?'🎉 Grátis':fmt(frete)}</span></div>
-      <div class="summary-total"><span>Total</span><span style="color:var(--vermelho)">${fmt(total+frete)}</span></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label for="cName">Nome Completo</label><input type="text" id="cName" placeholder="Seu nome completo"></div>
-      <div class="form-group"><label for="cEmail">E-mail</label><input type="email" id="cEmail" placeholder="email@exemplo.com"></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label for="cPhone">Telefone</label><input type="text" id="cPhone" placeholder="(00) 00000-0000"></div>
-      <div class="form-group"><label for="cCpf">CPF</label><input type="text" id="cCpf" placeholder="000.000.000-00"></div>
-    </div>
-    <div class="form-group"><label for="cAddress">Endereço Completo</label><input type="text" id="cAddress" placeholder="Rua, número, bairro, complemento"></div>
-    <div class="form-row">
-      <div class="form-group"><label for="cCity">Cidade / Estado</label><input type="text" id="cCity" placeholder="Cidade - UF"></div>
-      <div class="form-group"><label for="cCep">CEP</label><input type="text" id="cCep" placeholder="00000-000"></div>
-    </div>
-    <div class="form-group">
-      <label for="cPayment">Forma de Pagamento</label>
-      <select id="cPayment"><option value="PIX">PIX</option><option value="Cartão de Crédito">Cartão de Crédito</option><option value="Cartão de Débito">Cartão de Débito</option><option value="Boleto">Boleto Bancário</option></select>
-    </div>
-    <button class="submit-order-btn" onclick="submitOrder(${frete})">✅ Confirmar Pedido</button>
-  `;
-  let modal = safeGetElement('checkoutModal');
-  if (!modal) {
-    ensureElements();
-    modal = safeGetElement('checkoutModal');
-  }
-  console.log('checkoutModal:', modal);
-  if (modal) {
-    modal.classList.add('open');
-    console.log('✅ checkoutModal class open adicionado');
-  }
-}
-
-function closeCheckout() { 
-  console.log('❌ closeCheckout chamado');
-  let modal = safeGetElement('checkoutModal');
-  if (!modal) {
-    ensureElements();
-    modal = safeGetElement('checkoutModal');
-  }
-  if (modal) {
-    modal.classList.remove('open');
-    console.log('✅ checkoutModal class open removido');
-  }
-}
-
-async function submitOrder(frete) {
-  const name = safeGetElement('cName')?.value.trim();
-  const email = safeGetElement('cEmail')?.value.trim();
-  const phone = safeGetElement('cPhone')?.value.trim();
-  const cpf = safeGetElement('cCpf')?.value.trim();
-  const address = safeGetElement('cAddress')?.value.trim();
-  const city = safeGetElement('cCity')?.value.trim();
-  const cep = safeGetElement('cCep')?.value.trim();
-  const payment = safeGetElement('cPayment')?.value;
-
-  if (!name || !email || !phone || !address || !city || !cep) { 
-    showToast('⚠️ Preencha todos os campos obrigatórios!'); 
-    return; 
-  }
-
-  const total = getCartTotal();
-  const orderData = {
-    customer: { name, email, phone, cpf, address: address + ', ' + city + ', CEP ' + cep },
-    items: [...cart], 
-    subtotal: total, 
-    frete, 
-    total: total + frete, 
-    payment,
-    status: 'Pendente', 
-    paymentStatus: 'Aguardando'
-  };
-  
-  const result = await submitOrderToAPI(orderData);
-  if (!result) return;
-
-  const existingCustomers = JSON.parse(localStorage.getItem('cia_customers') || '[]');
-  const customerExists = existingCustomers.some(c => c.email === email);
-  if (!customerExists) {
-    existingCustomers.push({
-      id: Date.now(),
-      name: name,
-      email: email,
-      phone: phone,
-      cpf: cpf,
-      address: address,
-      created_at: new Date().toISOString()
-    });
-    localStorage.setItem('cia_customers', JSON.stringify(existingCustomers));
-  }
-  // Salvar cliente no banco de dados via backend
-  try {
-    await fetch(`${API_URL}/customers`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name: name,
-        email: email,
-        phone: phone,
-        cpf: cpf,
-        address: address
-      })
-    });
-  } catch (e) {
-    showToast('Erro ao salvar cliente no banco de dados.');
-  }
-  
-  const orderId = result.id;
-  cart = [];
-  updateCartBadge();
-safeGetElement
-  const checkoutBody = document.getElementById('checkoutBody');
+  const checkoutBody = safeGetElement('checkoutBody');
+  console.log('✓ checkoutBody encontrado:', !!checkoutBody);
   if (checkoutBody) {
     checkoutBody.innerHTML = `
-      <div class="success-screen">
-        <span class="icon">🎉</span>
-        <h3>Pedido Confirmado!</h3>
-        <div class="order-code">${orderId}</div>
-        <p>Obrigado pela compra! Você receberá um e-mail de confirmação em breve.</p>
-        <button class="submit-order-btn" onclick="closeCheckout(); renderProducts();">Voltar às Compras</button>
+      <h3>Resumo do Pedido</h3>
+      <div style="background: #f5f5f5; padding: 12px; border-radius: 4px; margin-bottom: 20px;">
+        ${cart.map(item => `<div style="display: flex; justify-content: space-between; margin-bottom: 8px;"><span>${item.name} (x${item.qty})</span><strong>${fmt(item.price * item.qty)}</strong></div>`).join('')}
+        <div style="border-top: 2px solid #ddd; padding-top: 8px; margin-top: 8px; font-size: 18px; font-weight: bold; display: flex; justify-content: space-between;"><span>Total:</span><span style="color: var(--vermelho);">${fmt(getCartTotal())}</span></div>
       </div>
+      <div class="form-group">
+        <label>Nome Completo</label>
+        <input type="text" id="cName" placeholder="João Silva">
+      </div>
+      <div class="form-group">
+        <label>E-mail</label>
+        <input type="email" id="cEmail" placeholder="joao@exemplo.com">
+      </div>
+      <button class="submit-order-btn" onclick="submitOrder()">✓ Confirmar Pedido</button>
     `;
   }
-  showToast('✅ Pedido realizado com sucesso!');
+  const modal = safeGetElement('checkoutModal');
+  if (modal) {
+    modal.classList.add('open');
+    modal.style.display = 'flex';
+    modal.style.zIndex = '300';
+    modal.style.alignItems = 'center';
+    modal.style.justifyContent = 'center';
+    console.log('✓ checkoutModal aberto e estilos forçados');
+  }
+}
+
+function closeCheckout() {
+  const modal = safeGetElement('checkoutModal');
+  if (modal) {
+    modal.classList.remove('open');
+    modal.style.display = 'none';
+    console.log('✓ checkoutModal fechado');
+  }
+}
+
+async function submitOrder() {
+  const nameEl = safeGetElement('cName');
+  const emailEl = safeGetElement('cEmail');
+  const name = nameEl ? nameEl.value.trim() : '';
+  const email = emailEl ? emailEl.value.trim() : '';
+
+  if (!name || !email) {
+    showToast('Preencha os campos obrigatórios!');
+    return;
+  }
+
+  cart = [];
+  updateCartBadge();
+  const checkoutBody = safeGetElement('checkoutBody');
+  if (checkoutBody) checkoutBody.innerHTML = '<div style="text-align:center;padding:40px"><span style="font-size:70px">🎉</span><h3 style="color:var(--vermelho);margin-top:20px">Pedido Confirmado!</h3><p>Obrigado pela compra!</p><button class="submit-order-btn" onclick="closeCheckout(); renderProducts();">Voltar às Compras</button></div>';
+  showToast('Pedido realizado com sucesso!');
+}
+
+function openAuth() {
+  ensureModalsExist();
+  console.log('🔓 openAuth chamado');
+  const authModal = safeGetElement('authModal');
+  console.log('✓ authModal encontrado:', !!authModal);
+  if (authModal) {
+    authModal.classList.add('open');
+    // Forçar estilos
+    authModal.style.display = 'flex';
+    authModal.style.zIndex = '300';
+    authModal.style.alignItems = 'center';
+    authModal.style.justifyContent = 'center';
+    console.log('✓ Classe "open" adicionada ao authModal, estilos forçados');
+    showAuthTab('login');
+  } else {
+    console.error('✗ Elemento authModal não foi encontrado no DOM');
+  }
+}
+
+function closeAuth() {
+  const authModal = safeGetElement('authModal');
+  if (authModal) {
+    authModal.classList.remove('open');
+    authModal.style.display = 'none';
+    console.log('✓ authModal fechado');
+  }
+}
+
+function showAuthTab(tab) {
+  console.log('📋 showAuthTab chamado com tab:', tab);
+  const container = safeGetElement('authContent');
+  const tabLogin = safeGetElement('tabLogin');
+  const tabRegister = safeGetElement('tabRegister');
+  
+  console.log('✓ authContent:', !!container, 'tabLogin:', !!tabLogin, 'tabRegister:', !!tabRegister);
+  if (!container || !tabLogin || !tabRegister) {
+    console.error('✗ Um ou mais elementos de abas não foram encontrados');
+    return;
+  }
+
+  if (tab === 'login') {
+    tabLogin.style.color = 'var(--vermelho)';
+    tabLogin.style.borderBottomColor = 'var(--vermelho)';
+    tabRegister.style.color = '#aaa';
+    tabRegister.style.borderBottomColor = 'transparent';
+    
+    container.innerHTML = `
+      <div class="form-group">
+        <label>E-mail</label>
+        <input type="email" id="aEmail" placeholder="seu@exemplo.com">
+      </div>
+      <div class="form-group">
+        <label>Senha</label>
+        <input type="password" id="aPassword" placeholder="••••••••">
+      </div>
+      <button class="submit-order-btn" onclick="doLogin()">🔓 Entrar</button>
+    `;
+  } else {
+    tabLogin.style.color = '#aaa';
+    tabLogin.style.borderBottomColor = 'transparent';
+    tabRegister.style.color = 'var(--vermelho)';
+    tabRegister.style.borderBottomColor = 'var(--amarelo)';
+    
+    container.innerHTML = `
+      <div class="form-group">
+        <label>Nome Completo</label>
+        <input type="text" id="rName" placeholder="Seu nome completo">
+      </div>
+      <div class="form-group">
+        <label>CPF <small style="color:#c0392b">(exatamente 11 dígitos)</small></label>
+        <input type="text" id="rCPF" placeholder="00000000000" maxlength="14">
+      </div>
+      <div class="form-group">
+        <label>Telefone <small style="color:#c0392b">(81) 9 + 8 dígitos)</small></label>
+        <input type="tel" id="rPhone" placeholder="(81) 9XXXX-XXXX" maxlength="15">
+      </div>
+      <div class="form-group">
+        <label>E-mail</label>
+        <input type="email" id="rEmail" placeholder="seu@exemplo.com">
+      </div>
+      <div class="form-group">
+        <label>Senha</label>
+        <input type="password" id="rPassword" placeholder="••••••••">
+      </div>
+      <button class="submit-order-btn" onclick="doRegister()">✅ Cadastrar</button>
+    `;
+    
+    // Adicionar event listeners após renderizar os inputs
+    setTimeout(() => {
+      const phoneInput = document.getElementById('rPhone');
+      const cpfInput = document.getElementById('rCPF');
+      
+      if (phoneInput) {
+        // Inicializar com (81) 9
+        phoneInput.value = '(81) 9';
+        phoneInput.addEventListener('input', formatarTelefone);
+        phoneInput.addEventListener('keydown', protegerPrefixoTelefone);
+      }
+      
+      if (cpfInput) {
+        cpfInput.addEventListener('input', formatarCPF);
+      }
+    }, 0);
+  }
+}
+
+function doLogin() {
+  showToast('Login realizado!');
+  closeAuth();
+}
+
+function protegerPrefixoTelefone(e) {
+  const input = e.target;
+  // Se tentar apagar dentro dos primeiros 6 caracteres: (81) 9
+  // Posições críticas: ( [ ]  8 [ ]  1 [ ]  ) [ ]  9
+  // Apenas apagar é permitido nas posições após o 9
+  if (e.key === 'Backspace' || e.key === 'Delete') {
+    const cursorPos = input.selectionStart;
+    // Impedir apagar antes da posição 6 (após o "9" de "(81) 9")
+    if (cursorPos <= 6) {
+      e.preventDefault();
+      return false;
+    }
+  }
+}
+
+function formatarTelefone(e) {
+  let valor = e.target.value.replace(/\D/g, '');
+  
+  // Forçar o prefixo (81)9 no início
+  if (!valor.startsWith('819')) {
+    if (valor.length === 0) {
+      valor = '819';
+    } else if (valor.length === 1) {
+      valor = '819' + valor.substring(0, 0);
+    } else if (valor.length === 2) {
+      valor = '819' + valor.substring(0, 0);
+    } else if (valor.length >= 3) {
+      // Se o usuário digitou errado, corrigir para 819
+      const resto = valor.substring(3);
+      valor = '819' + resto.substring(0, 8);
+    }
+  }
+  
+  // Limitar a 11 dígitos (81 9 + 8 dígitos)
+  valor = valor.substring(0, 11);
+  
+  // Formatar como (81) 9XXXX-XXXX
+  let formatado = '';
+  if (valor.length > 0) {
+    formatado = '(' + valor.substring(0, 2);
+    if (valor.length > 2) {
+      formatado += ') ' + valor.substring(2, 7);
+      if (valor.length > 7) {
+        formatado += '-' + valor.substring(7);
+      }
+    } else {
+      formatado += ')';
+    }
+  }
+  
+  e.target.value = formatado;
+}
+
+function formatarCPF(e) {
+  let valor = e.target.value.replace(/\D/g, '');
+  
+  // Limitar a 11 dígitos
+  valor = valor.substring(0, 11);
+  
+  // Formatar como XXX.XXX.XXX-XX
+  let formatado = '';
+  if (valor.length > 0) {
+    formatado = valor.substring(0, 3);
+    if (valor.length > 3) {
+      formatado += '.' + valor.substring(3, 6);
+      if (valor.length > 6) {
+        formatado += '.' + valor.substring(6, 9);
+        if (valor.length > 9) {
+          formatado += '-' + valor.substring(9);
+        }
+      }
+    }
+  }
+  
+  e.target.value = formatado;
+}
+
+function validarTelefone(telefone) {
+  // Remover formatação
+  const apenas_numeros = telefone.replace(/\D/g, '');
+  
+  // Deve ter exatamente 11 dígitos
+  if (apenas_numeros.length !== 11) {
+    return false;
+  }
+  
+  // Deve começar com 819
+  if (!apenas_numeros.startsWith('819')) {
+    return false;
+  }
+  
+  return true;
+}
+
+function validarCPF(cpf) {
+  // Remover formatação
+  const apenas_numeros = cpf.replace(/\D/g, '');
+  
+  // Deve ter exatamente 11 dígitos
+  if (apenas_numeros.length !== 11) {
+    return false;
+  }
+  
+  return true;
+}
+
+function doRegister() {
+  const nameEl = document.getElementById('rName');
+  const cpfEl = document.getElementById('rCPF');
+  const phoneEl = document.getElementById('rPhone');
+  const emailEl = document.getElementById('rEmail');
+  const passwordEl = document.getElementById('rPassword');
+  
+  const name = nameEl ? nameEl.value.trim() : '';
+  const cpf = cpfEl ? cpfEl.value.trim() : '';
+  const phone = phoneEl ? phoneEl.value.trim() : '';
+  const email = emailEl ? emailEl.value.trim() : '';
+  const password = passwordEl ? passwordEl.value.trim() : '';
+  
+  // Validar campos obrigatórios
+  if (!name) {
+    showToast('⚠️ Preencha o nome completo!');
+    return;
+  }
+  
+  if (!cpf) {
+    showToast('⚠️ Preencha o CPF!');
+    return;
+  }
+  
+  if (!validarCPF(cpf)) {
+    showToast('⚠️ CPF deve conter exatamente 11 dígitos!');
+    return;
+  }
+  
+  if (!phone) {
+    showToast('⚠️ Preencha o telefone!');
+    return;
+  }
+  
+  if (!validarTelefone(phone)) {
+    showToast('⚠️ Telefone deve ser (81) 9 + 8 dígitos!');
+    return;
+  }
+  
+  if (!email) {
+    showToast('⚠️ Preencha o e-mail!');
+    return;
+  }
+  
+  if (!password) {
+    showToast('⚠️ Preencha a senha!');
+    return;
+  }
+  
+  // Enviar dados para a API
+  const cpfNumeros = cpf.replace(/\D/g, '');
+  const phoneNumeros = phone.replace(/\D/g, '');
+  
+  fetch(`${API_URL}/auth/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name,
+      cpf: cpfNumeros,
+      phone: phoneNumeros,
+      email,
+      password
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.error) {
+      showToast('❌ ' + data.error);
+    } else {
+      showToast('✅ Cadastro realizado com sucesso!');
+      // Armazenar token se necessário
+      if (data.token) {
+        localStorage.setItem('authToken', data.token);
+      }
+      closeAuth();
+    }
+  })
+  .catch(err => {
+    console.error('Erro no cadastro:', err);
+    showToast('❌ Erro ao realizar cadastro');
+  });
 }
 
 function showToast(msg) {
@@ -684,163 +928,45 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-function openAuth() { 
-  console.log('🔐 openAuth chamado');
-  setTimeout(() => {
-    let modal = safeGetElement('authModal');
-    if (!modal) {
-      ensureElements();
-      modal = safeGetElement('authModal');
-    }
-    console.log('authModal:', modal);
-    if (modal) {
-      modal.classList.add('open');
-      console.log('✅ authModal class open adicionado');
-    } else {
-      console.error('❌ authModal NÃO ENCONTRADO!');
-    }
-  }, 10);
-}
-
-function closeAuth(e) {
-  console.log('❌ closeAuth chamado, e=', e);
-  if (e) e.stopPropagation();
-  setTimeout(() => {
-    let modal = safeGetElement('authModal');
-    if (!modal) {
-      ensureElements();
-      modal = safeGetElement('authModal');
-    }
-    console.log('authModal para fechar:', modal);
-    if (modal) {
-      modal.classList.remove('open');
-      console.log('✅ authModal class open removido');
-    }
-  }, 10);
-}
-
-function showAuthTab(tab) {
-  const tabLogin = safeGetElement('tabLogin');
-  const tabRegister = safeGetElement('tabRegister');
-  const c = safeGetElement('authContent');
-  
-  if (!c) return;
-  
-  if (tabLogin) {
-    tabLogin.style.opacity = tab === 'login' ? '1' : '0.7';
-    tabLogin.style.borderBottomColor = tab === 'login' ? 'var(--vermelho)' : 'transparent';
-    tabLogin.style.color = tab === 'login' ? 'var(--vermelho)' : '#aaa';
-  }
-  if (tabRegister) {
-    tabRegister.style.opacity = tab === 'register' ? '1' : '0.7';
-    tabRegister.style.borderBottomColor = tab === 'register' ? 'var(--amarelo)' : 'transparent';
-    tabRegister.style.color = tab === 'register' ? 'var(--vermelho)' : '#aaa';
-  }
-  
-  if (tab === 'login') {
-    c.innerHTML = `
-      <div class="form-group"><label for="aEmail">E-mail</label><input type="email" id="aEmail" placeholder="seu@exemplo.com"></div>
-      <div class="form-group"><label for="aPassword">Senha</label><input type="password" id="aPassword" placeholder="••••••••"></div>
-      <div style="display:flex;gap:10px;margin-top:20px;"><button onclick="doLogin()" style="flex:1;background:var(--vermelho);color:white;padding:12px;border-radius:6px;border:none;font-weight:800;cursor:pointer;">🔓 Entrar</button><button onclick="showAuthTab('register')" style="flex:1;border:2px solid #eee;padding:12px;border-radius:6px;background:#fff;font-weight:700;cursor:pointer;">Criar Conta →</button></div>
-    `;
-  } else {
-    c.innerHTML = `
-      <div class="form-group"><label for="rName">Nome Completo</label><input type="text" id="rName" placeholder="Seu nome"></div>
-      <div class="form-group"><label for="rEmail">E-mail</label><input type="email" id="rEmail" placeholder="seu@exemplo.com"></div>
-      <div class="form-group"><label for="rPhone">Telefone</label><input type="text" id="rPhone" placeholder="(00) 00000-0000"></div>
-      <div class="form-group"><label for="rCpf">CPF</label><input type="text" id="rCpf" placeholder="000.000.000-00"></div>
-      <div class="form-group"><label for="rAddress">Endereço para Entrega</label><input type="text" id="rAddress" placeholder="Rua, número, bairro, complemento"></div>
-      <div class="form-group"><label for="rPassword">Senha</label><input type="password" id="rPassword" placeholder="••••••••"></div>
-      <div class="form-group"><label for="rPassword2">Confirmar Senha</label><input type="password" id="rPassword2" placeholder="••••••••"></div>
-      <div style="display:flex;gap:10px;margin-top:20px;"><button onclick="doRegister()" style="flex:1;background:var(--amarelo);color:var(--vermelho);padding:12px;border-radius:6px;border:none;font-weight:800;cursor:pointer;">✅ Cadastrar</button><button onclick="showAuthTab('login')" style="flex:1;border:2px solid #eee;padding:12px;border-radius:6px;background:#fff;font-weight:700;cursor:pointer;">← Voltar</button></div>
-    `;
-  }
-}
-
-async function doRegister() {
-  const name = safeGetElement('rName')?.value.trim();
-  const email = safeGetElement('rEmail')?.value.trim().toLowerCase();
-  const phone = safeGetElement('rPhone')?.value.trim();
-  const cpf = safeGetElement('rCpf')?.value.trim();
-  const address = safeGetElement('rAddress')?.value.trim();
-  const pass = safeGetElement('rPassword')?.value;
-  const pass2 = safeGetElement('rPassword2')?.value;
-  if (!name || !email || !phone || !cpf || !address || !pass) { showToast('Preencha todos os campos.'); return; }
-  if (pass !== pass2) { showToast('As senhas não coincidem.'); return; }
-
-  const user = await registerUser(name, email, pass, phone, cpf, address);
-  if (user) {
-    setCurrentUser({ name: user.user?.name || name, email: user.user?.email || email });
-    showToast('✅ Conta criada com sucesso!');
-    closeAuth();
-  }
-}
-
-async function doLogin() {
-  const email = (safeGetElement('aEmail')?.value || '').trim().toLowerCase();
-  const pass = safeGetElement('aPassword')?.value || '';
-  if (!email || !pass) { showToast('Preencha e-mail e senha.'); return; }
-  
-  const user = await loginUser(email, pass);
-  if (user) {
-    // Salvar cliente no localStorage do admin se não existir
-    const existingCustomers = JSON.parse(localStorage.getItem('cia_customers') || '[]');
-    const customerExists = existingCustomers.some(c => c.email === email);
-    if (!customerExists) {
-      existingCustomers.push({
-        id: Date.now(),
-        name: user.user?.name || email.split('@')[0],
-        email: email,
-        phone: '',
-        cpf: '',
-        address: '',
-        created_at: new Date().toISOString()
-      });
-      localStorage.setItem('cia_customers', JSON.stringify(existingCustomers));
-    }
-    
-    setCurrentUser({ name: user.user?.name || email, email: user.user?.email || email });
-    showToast('✅ Login realizado!');
-    closeAuth();
-  }
-}
-
-function doLogout() { clearCurrentUser(); showToast('Desconectado.'); }
-
-function updateAuthUI() {
-  const container = safeGetElement('authBtn');
-  const userBadge = safeGetElement('userBadge');
-  const user = getCurrentUser();
-  if (!container) return;
-  if (user) {
-    container.style.display = 'none';
-    if (!userBadge) {
-      const badge = document.createElement('div');
-      badge.id = 'userBadge';
-      badge.className = 'user-badge';
-      badge.innerHTML = `Olá, ${escapeHtml(user.name.split(' ')[0] || user.email)} <button style="margin-left:10px;background:none;border:none;cursor:pointer;font-weight:700;color:var(--vermelho);" onclick="doLogout()">Sair</button>`;
-      container.parentNode.insertBefore(badge, container.nextSibling);
-    } else {
-      userBadge.innerHTML = `Olá, ${escapeHtml(user.name.split(' ')[0] || user.email)} <button style="margin-left:10px;background:none;border:none;cursor:pointer;font-weight:700;color:var(--vermelho);" onclick="doLogout()">Sair</button>`;
-    }
-  } else {
-    container.style.display = 'block';
-    const badge = safeGetElement('userBadge');
-    if (badge) badge.remove();
-  }
-}
-
-function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]); }
-
-// Initialize page
 document.addEventListener('DOMContentLoaded', () => {
-  // Remover classes injetadas por extensões que ocultam elementos
-  document.querySelectorAll('.hide_modal').forEach(el => {
-    el.classList.remove('hide_modal');
-    el.style.display = '';
+  console.log('✓ DOM carregado - inicializando aplicação');
+  console.log('✓ API URL:', API_URL);
+  // Verificar se elementos críticos existem
+  const criticalElements = ['authModal', 'cartSidebar', 'checkoutModal', 'productsGrid'];
+  criticalElements.forEach(id => {
+    const el = document.getElementById(id);
+    console.log(`  ${el ? '✓' : '✗'} ${id}: ${el ? 'encontrado' : 'NÃO ENCONTRADO'}`);
   });
+  
+  // Monitorar mudanças no DOM
+  const observer = new MutationObserver((mutations) => {
+    // Verificar se algum elemento crítico foi removido
+    const cartSidebar = document.getElementById('cartSidebar');
+    const authModal = document.getElementById('authModal');
+    const checkoutModal = document.getElementById('checkoutModal');
+    
+    if (!cartSidebar || !authModal || !checkoutModal) {
+      console.error('❌ ALERTA: Um ou mais modais foram removidos do DOM!');
+      ensureModalsExist();
+    }
+  });
+  
+  // Observar mudanças na body
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+    attributes: false
+  });
+  
+  // WATCHDOG: Verificar a cada 2 segundos se os modais existem
+  setInterval(() => {
+    ensureModalsExist();
+  }, 2000);
+  
+  // Adicionar event listeners
+  setupModalListeners();
+  
   renderProducts();
-  updateAuthUI();
 });
 </script>
 </body>

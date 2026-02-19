@@ -11,13 +11,17 @@ function genToken(user){
 }
 
 router.post('/register', async (req, res) => {
-  const { name, email, password } = req.body || {};
-  if(!name || !email || !password) return res.status(400).json({ error: 'Missing fields' });
+  const { name, cpf, phone, email, password } = req.body || {};
+  if(!name || !cpf || !phone || !email || !password) return res.status(400).json({ error: 'Missing fields' });
   try{
     const exists = await db.query('select id from users where email=$1', [email]);
     if(exists.rowCount) return res.status(400).json({ error: 'Email already in use' });
+    
+    const cpfExists = await db.query('select id from users where cpf=$1', [cpf]);
+    if(cpfExists.rowCount) return res.status(400).json({ error: 'CPF already registered' });
+    
     const hash = await bcrypt.hash(password, 10);
-    const result = await db.query('insert into users(name,email,password_hash) values($1,$2,$3) returning id,name,email,created_at', [name, email, hash]);
+    const result = await db.query('insert into users(name,cpf,phone,email,password_hash) values($1,$2,$3,$4,$5) returning id,name,cpf,phone,email,created_at', [name, cpf, phone, email, hash]);
     const user = result.rows[0];
     const token = genToken(user);
     res.json({ token, user });
