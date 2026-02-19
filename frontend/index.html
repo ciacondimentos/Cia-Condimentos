@@ -562,6 +562,10 @@ function openCheckout() {
     showToast('Adicione produtos ao carrinho!');
     return;
   }
+  
+  // Buscar dados do usuário logado
+  const userData = JSON.parse(localStorage.getItem('user') || '{}');
+  
   const checkoutBody = safeGetElement('checkoutBody');
   console.log('✓ checkoutBody encontrado:', !!checkoutBody);
   if (checkoutBody) {
@@ -573,19 +577,19 @@ function openCheckout() {
       </div>
       <div class="form-group">
         <label>Nome Completo *</label>
-        <input type="text" id="cName" placeholder="João Silva" required>
+        <input type="text" id="cName" value="${userData.name || ''}" readonly required>
       </div>
       <div class="form-group">
         <label>E-mail *</label>
-        <input type="email" id="cEmail" placeholder="joao@exemplo.com" required>
+        <input type="email" id="cEmail" value="${userData.email || ''}" readonly required>
       </div>
       <div class="form-group">
         <label>Telefone *</label>
-        <input type="text" id="cPhone" placeholder="(81) 99999-9999" required>
+        <input type="text" id="cPhone" value="" readonly required>
       </div>
       <div class="form-group">
         <label>CPF</label>
-        <input type="text" id="cCPF" placeholder="000.000.000-00">
+        <input type="text" id="cCPF" value="" readonly>
       </div>
       <div class="form-group">
         <label>Endereço Completo *</label>
@@ -612,18 +616,23 @@ function openCheckout() {
     modal.style.justifyContent = 'center';
     console.log('✓ checkoutModal aberto e estilos forçados');
     
-    // Adicionar formatadores após um pequeno delay para garantir que os elementos existem
+    // Adicionar formatadores e preencher dados após um pequeno delay para garantir que os elementos existem
     setTimeout(() => {
       const phoneInput = document.getElementById('cPhone');
       const cpfInput = document.getElementById('cCPF');
       
-      if (phoneInput) {
+      // Preencher telefone e CPF com dados do usuário (se disponíveis)
+      if (phoneInput && userData.phone) {
+        phoneInput.value = userData.phone;
+      } else if (phoneInput) {
         phoneInput.value = '(81) 9';
         phoneInput.addEventListener('input', formatarTelefone);
         phoneInput.addEventListener('keydown', protegerPrefixoTelefone);
       }
       
-      if (cpfInput) {
+      if (cpfInput && userData.cpf) {
+        cpfInput.value = userData.cpf;
+      } else if (cpfInput) {
         cpfInput.addEventListener('input', formatarCPF);
       }
     }, 0);
@@ -640,24 +649,28 @@ function closeCheckout() {
 }
 
 async function submitOrder() {
-  const nameEl = safeGetElement('cName');
-  const emailEl = safeGetElement('cEmail');
-  const phoneEl = safeGetElement('cPhone');
-  const cpfEl = safeGetElement('cCPF');
   const addressEl = safeGetElement('cAddress');
   const paymentEl = safeGetElement('cPayment');
   
-  const name = nameEl ? nameEl.value.trim() : '';
-  const email = emailEl ? emailEl.value.trim() : '';
-  const phone = phoneEl ? phoneEl.value.trim() : '';
-  const cpf = cpfEl ? cpfEl.value.trim() : '';
+  // Buscar dados do usuário logado
+  const userData = JSON.parse(localStorage.getItem('user') || '{}');
+  
   const address = addressEl ? addressEl.value.trim() : '';
   const payment = paymentEl ? paymentEl.value : 'PIX';
 
-  if (!name || !email || !phone || !address) {
-    showToast('Preencha todos os campos obrigatórios!');
+  if (!address) {
+    showToast('Preencha o endereço de entrega!');
     return;
   }
+
+  // Usar dados do usuário logado
+  const customer = {
+    name: userData.name,
+    email: userData.email,
+    phone: userData.phone,
+    cpf: userData.cpf,
+    address: address
+  };
 
   // Calcular valores
   const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
@@ -669,7 +682,7 @@ async function submitOrder() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        customer: { name, email, phone, cpf, address },
+        customer: customer,
         items: cart.map(i => ({ id: i.id, qty: i.qty, price: i.price })),
         subtotal,
         frete,
