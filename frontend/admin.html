@@ -620,7 +620,7 @@ async function reloadAll() {
 async function updateSidebarCounts() {
   const products = await getProducts();
   const orders = getOrders();
-  const customers = getCustomers();
+  const customers = await getCustomers();
   document.getElementById('prodCount').textContent = products.filter(p => p.active).length;
   document.getElementById('ordersCount').textContent = orders.filter(o => o.status === 'Pendente').length;
   document.getElementById('customersCount').textContent = customers.length;
@@ -744,11 +744,12 @@ function renderTopProducts(orders, products) {
 // Buscar clientes do backend
 async function getCustomers() {
   try {
-    const response = await fetch('/api/customers');
+    const apiUrl = 'https://cia-condimentos.onrender.com/api';
+    const response = await fetch(`${apiUrl}/auth/users`);
     if (!response.ok) throw new Error('Erro ao buscar clientes do backend');
     return await response.json();
   } catch (e) {
-    console.warn('Erro ao buscar clientes do backend');
+    console.error('Erro ao buscar clientes do backend:', e);
     return [];
   }
 }
@@ -782,7 +783,7 @@ async function saveCustomers(customers) {
 async function renderCustomersTable() {
   const search = document.getElementById('customersSearch')?.value.toLowerCase() || '';
   const orders = getOrders();
-  let customers = getCustomers();
+  let customers = await getCustomers();
 
   if (search) {
     customers = customers.filter(c => 
@@ -801,7 +802,7 @@ async function renderCustomersTable() {
   tbody.innerHTML = customers.map(c => {
     const customerOrders = orders.filter(o => o.customer_email === c.email);
     const totalSpent = customerOrders.reduce((s, o) => s + (o.total || 0), 0);
-    const regDate = new Date(c.created_at || Date.now());
+    const regDate = new Date(c.createdAt || Date.now());
     return `
       <tr>
         <td><strong>${c.name}</strong></td>
@@ -825,7 +826,7 @@ function filterCustomersTable() {
 }
 
 async function viewCustomerDetails(email) {
-  const customers = getCustomers();
+  const customers = await getCustomers();
   const customer = customers.find(c => c.email === email);
   const orders = getOrders().filter(o => o.customer_email === email);
   
@@ -882,24 +883,20 @@ async function viewCustomerDetails(email) {
 }
 
 function deleteCustomer(email) {
-  confirm('Deletar este cliente?', 'Esta ação não pode ser desfeita.', () => {
-    const customers = getCustomers();
-    const filtered = customers.filter(c => c.email !== email);
-    saveCustomers(filtered);
-    renderCustomersTable();
-    showToast('✅ Cliente removido!');
-  });
+  if (!confirm('Deletar este cliente? Esta ação não pode ser desfeita.')) return;
+  // TODO: Implementar API de deletar cliente
+  showToast('❌ Função ainda não implementada');
 }
 
-function exportCustomers() {
-  const customers = getCustomers();
+async function exportCustomers() {
+  const customers = await getCustomers();
   const orders = getOrders();
   
   const csv = ['Nome,Email,Telefone,CPF,Pedidos,Total Gasto,Data Cadastro'];
   customers.forEach(c => {
     const customerOrders = orders.filter(o => o.customer_email === c.email);
     const totalSpent = customerOrders.reduce((s, o) => s + (o.total || 0), 0);
-    const regDate = new Date(c.created_at || Date.now()).toLocaleDateString('pt-BR');
+    const regDate = new Date(c.createdAt || Date.now()).toLocaleDateString('pt-BR');
     csv.push(`"${c.name}","${c.email}","${c.phone || ''}","${c.cpf || ''}",${customerOrders.length},"R$ ${totalSpent.toFixed(2)}","${regDate}"`);
   });
 
@@ -913,9 +910,9 @@ function exportCustomers() {
   showToast('✅ Arquivo exportado!');
 }
 
-function exportOrders() {
+async function exportOrders() {
   const orders = getOrders();
-  const customers = getCustomers();
+  const customers = await getCustomers();
   
   const csv = ['ID Pedido,Cliente,Email,Telefone,Data,Subtotal,Frete,Total,Forma de Pagamento,Status Pedido,Status Pagamento'];
   orders.forEach(o => {

@@ -63,4 +63,23 @@ router.get('/me', async (req, res) => {
   }
 });
 
+// Listar todos os usuários/clientes
+router.get('/users', async (req, res) => {
+  try{
+    const result = await db.query('select id,name,cpf,phone,email,created_at from users order by created_at desc');
+    const customers = result.rows.map(u => ({
+      id: u.id,
+      name: u.name,
+      cpf: u.cpf,
+      phone: u.phone,
+      email: u.email,
+      createdAt: u.created_at
+    }));
+    res.json(customers);
+  }catch(err){
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 module.exports = router;
