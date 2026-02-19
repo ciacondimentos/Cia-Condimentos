@@ -256,68 +256,73 @@ let cart = [], currentFilter = 'all', currentSearch = '', currentUser = null;
 
 // Garantir que os elementos necessários existam (contra extensões que removem)
 (function ensureElements() {
-  if (!document.getElementById('cartOverlay')) {
-    const overlay = document.createElement('div');
-    overlay.className = 'cart-overlay';
-    overlay.id = 'cartOverlay';
-    overlay.onclick = (e) => { if(e.target === overlay) toggleCart(e); };
-    document.body.appendChild(overlay);
-  }
-  if (!document.getElementById('cartSidebar')) {
-    const sidebar = document.createElement('div');
-    sidebar.className = 'cart-sidebar';
-    sidebar.id = 'cartSidebar';
-    sidebar.innerHTML = `
-      <div class="cart-header">
-        <h3>🛒 Seu Carrinho</h3>
-        <button class="cart-close" onclick="toggleCart()">✕</button>
-      </div>
-      <div class="cart-items" id="cartItems"></div>
-      <div class="cart-footer">
-        <div class="cart-total"><span>Total</span><span id="cartTotal">R$ 0,00</span></div>
-        <button class="checkout-btn" onclick="openCheckout()">Finalizar Compra</button>
-      </div>
-    `;
-    document.body.appendChild(sidebar);
-  }
-  if (!document.getElementById('checkoutModal')) {
-    const modal = document.createElement('div');
-    modal.className = 'modal-overlay';
-    modal.id = 'checkoutModal';
-    modal.onclick = (e) => { if(e.target === modal) closeCheckout(); };
-    modal.innerHTML = `
-      <div class="modal" onclick="event.stopPropagation();">
-        <div class="modal-header">
-          <h3>🌶️ Finalizar Pedido</h3>
-          <button style="background:none;border:none;color:white;font-size:24px;cursor:pointer" onclick="closeCheckout()">✕</button>
+  const createIfMissing = () => {
+    if (!document.getElementById('cartOverlay')) {
+      const overlay = document.createElement('div');
+      overlay.className = 'cart-overlay';
+      overlay.id = 'cartOverlay';
+      overlay.onclick = (e) => { if(e.target === overlay) toggleCart(e); };
+      document.body.appendChild(overlay);
+    }
+    if (!document.getElementById('cartSidebar')) {
+      const sidebar = document.createElement('div');
+      sidebar.className = 'cart-sidebar';
+      sidebar.id = 'cartSidebar';
+      sidebar.innerHTML = `
+        <div class="cart-header">
+          <h3>🛒 Seu Carrinho</h3>
+          <button class="cart-close" onclick="toggleCart()">✕</button>
         </div>
-        <div class="modal-body" id="checkoutBody"></div>
-      </div>
-    `;
-    document.body.appendChild(modal);
-  }
-  if (!document.getElementById('authModal')) {
-    const authModal = document.createElement('div');
-    authModal.className = 'modal-overlay';
-    authModal.id = 'authModal';
-    authModal.onclick = (e) => { if(e.target === authModal) closeAuth(); };
-    authModal.innerHTML = `
-      <div class="modal" onclick="event.stopPropagation();">
-        <div class="modal-header">
-          <h3 id="authTitle">🔐 Entrar / Cadastrar</h3>
-          <button style="background:none;border:none;color:white;font-size:24px;cursor:pointer" onclick="closeAuth()">✕</button>
+        <div class="cart-items" id="cartItems"></div>
+        <div class="cart-footer">
+          <div class="cart-total"><span>Total</span><span id="cartTotal">R$ 0,00</span></div>
+          <button class="checkout-btn" onclick="openCheckout()">Finalizar Compra</button>
         </div>
-        <div class="modal-body">
-          <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #e0d8c8; padding-bottom: 10px;">
-            <button id="tabLogin" style="flex: 1; background: transparent; border: none; padding: 10px; font-weight: 700; cursor: pointer; border-bottom: 3px solid var(--vermelho); color: var(--vermelho);" onclick="showAuthTab('login')">🔓 Entrar</button>
-            <button id="tabRegister" style="flex: 1; background: transparent; border: none; padding: 10px; font-weight: 700; cursor: pointer; border-bottom: 3px solid transparent; color: #aaa; opacity: 0.7;" onclick="showAuthTab('register')">➕ Cadastrar</button>
+      `;
+      document.body.appendChild(sidebar);
+    }
+    if (!document.getElementById('checkoutModal')) {
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay';
+      modal.id = 'checkoutModal';
+      modal.onclick = (e) => { if(e.target === modal) closeCheckout(); };
+      modal.innerHTML = `
+        <div class="modal" onclick="event.stopPropagation();">
+          <div class="modal-header">
+            <h3>🌶️ Finalizar Pedido</h3>
+            <button style="background:none;border:none;color:white;font-size:24px;cursor:pointer" onclick="closeCheckout()">✕</button>
           </div>
-          <div id="authContent"></div>
+          <div class="modal-body" id="checkoutBody"></div>
         </div>
-      </div>
-    `;
-    document.body.appendChild(authModal);
-  }
+      `;
+      document.body.appendChild(modal);
+    }
+    if (!document.getElementById('authModal')) {
+      const authModal = document.createElement('div');
+      authModal.className = 'modal-overlay';
+      authModal.id = 'authModal';
+      authModal.onclick = (e) => { if(e.target === authModal) closeAuth(); };
+      authModal.innerHTML = `
+        <div class="modal" onclick="event.stopPropagation();">
+          <div class="modal-header">
+            <h3 id="authTitle">🔐 Entrar / Cadastrar</h3>
+            <button style="background:none;border:none;color:white;font-size:24px;cursor:pointer" onclick="closeAuth()">✕</button>
+          </div>
+          <div class="modal-body">
+            <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #e0d8c8; padding-bottom: 10px;">
+              <button id="tabLogin" style="flex: 1; background: transparent; border: none; padding: 10px; font-weight: 700; cursor: pointer; border-bottom: 3px solid var(--vermelho); color: var(--vermelho);" onclick="showAuthTab('login')">🔓 Entrar</button>
+              <button id="tabRegister" style="flex: 1; background: transparent; border: none; padding: 10px; font-weight: 700; cursor: pointer; border-bottom: 3px solid transparent; color: #aaa; opacity: 0.7;" onclick="showAuthTab('register')">➕ Cadastrar</button>
+            </div>
+            <div id="authContent"></div>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(authModal);
+    }
+  };
+  createIfMissing();
+  setTimeout(createIfMissing, 100);
+  setTimeout(createIfMissing, 500);
 })();
 
 // API Calls
@@ -400,9 +405,13 @@ function getCurrentUser() {
 function toggleCart(e) {
   console.log('🛒 toggleCart chamado, e=', e);
   if (e) e.stopPropagation();
-  const sidebar = safeGetElement('cartSidebar');
-  const overlay = safeGetElement('cartOverlay');
-  console.log('sidebar:', sidebar, 'overlay:', overlay);
+  let sidebar = safeGetElement('cartSidebar');
+  let overlay = safeGetElement('cartOverlay');
+  if (!sidebar || !overlay) {
+    ensureElements();
+    sidebar = safeGetElement('cartSidebar');
+    overlay = safeGetElement('cartOverlay');
+  }
   if (sidebar && overlay) {
     sidebar.classList.toggle('open');
     overlay.classList.toggle('open');
@@ -530,7 +539,11 @@ function openCheckout() {
   if (cart.length === 0) { showToast('Adicione produtos ao carrinho!'); return; }
   const total = getCartTotal();
   const frete = total >= 50 ? 0 : 10.00;
-  const checkoutBody = safeGetElement('checkoutBody');
+  let checkoutBody = safeGetElement('checkoutBody');
+  if (!checkoutBody) {
+    ensureElements();
+    checkoutBody = safeGetElement('checkoutBody');
+  }
   if (!checkoutBody) return;
   checkoutBody.innerHTML = `
     <div class="order-summary">
@@ -558,7 +571,11 @@ function openCheckout() {
     </div>
     <button class="submit-order-btn" onclick="submitOrder(${frete})">✅ Confirmar Pedido</button>
   `;
-  const modal = safeGetElement('checkoutModal');
+  let modal = safeGetElement('checkoutModal');
+  if (!modal) {
+    ensureElements();
+    modal = safeGetElement('checkoutModal');
+  }
   console.log('checkoutModal:', modal);
   if (modal) {
     modal.classList.add('open');
@@ -568,7 +585,11 @@ function openCheckout() {
 
 function closeCheckout() { 
   console.log('❌ closeCheckout chamado');
-  const modal = safeGetElement('checkoutModal');
+  let modal = safeGetElement('checkoutModal');
+  if (!modal) {
+    ensureElements();
+    modal = safeGetElement('checkoutModal');
+  }
   if (modal) {
     modal.classList.remove('open');
     console.log('✅ checkoutModal class open removido');
@@ -666,8 +687,11 @@ function showToast(msg) {
 function openAuth() { 
   console.log('🔐 openAuth chamado');
   setTimeout(() => {
-    showAuthTab('login');
-    const modal = safeGetElement('authModal');
+    let modal = safeGetElement('authModal');
+    if (!modal) {
+      ensureElements();
+      modal = safeGetElement('authModal');
+    }
     console.log('authModal:', modal);
     if (modal) {
       modal.classList.add('open');
@@ -682,7 +706,11 @@ function closeAuth(e) {
   console.log('❌ closeAuth chamado, e=', e);
   if (e) e.stopPropagation();
   setTimeout(() => {
-    const modal = safeGetElement('authModal');
+    let modal = safeGetElement('authModal');
+    if (!modal) {
+      ensureElements();
+      modal = safeGetElement('authModal');
+    }
     console.log('authModal para fechar:', modal);
     if (modal) {
       modal.classList.remove('open');
