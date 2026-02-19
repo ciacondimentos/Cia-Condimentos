@@ -161,6 +161,24 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="authModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="authTitle">🔐 Entrar / Cadastrar</h3>
+      <button style="background:none;border:none;color:white;font-size:24px;cursor:pointer" onclick="closeAuth()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #e0d8c8; padding-bottom: 10px;">
+        <button id="tabLogin" style="flex: 1; background: transparent; border: none; padding: 10px; font-weight: 700; cursor: pointer; border-bottom: 3px solid transparent; color: var(--vermelho);" onclick="showAuthTab('login')">🔓 Entrar</button>
+        <button id="tabRegister" style="flex: 1; background: transparent; border: none; padding: 10px; font-weight: 700; cursor: pointer; border-bottom: 3px solid transparent; color: #aaa; opacity: 0.7;" onclick="showAuthTab('register')">➕ Cadastrar</button>
+      </div>
+      <div id="authContent"></div>
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+
 <header>
   <div class="header-top">✦ FRETE GRÁTIS A PARTIR DE R$ 50 - ABAIXO DISSO, TAXA DE R$ 10 POR ENTREGA ✦ CONDIMENTOS E ESPECIARIAS ✦</div>
   <div class="header-main">
@@ -560,22 +578,30 @@ function showAuthTab(tab) {
   
   if (!c) return;
   
-  if (tabLogin) tabLogin.style.opacity = tab === 'login' ? 1 : 0.7;
-  if (tabRegister) tabRegister.style.opacity = tab === 'register' ? 1 : 0.7;
+  if (tabLogin) {
+    tabLogin.style.opacity = tab === 'login' ? '1' : '0.7';
+    tabLogin.style.borderBottomColor = tab === 'login' ? 'var(--vermelho)' : 'transparent';
+    tabLogin.style.color = tab === 'login' ? 'var(--vermelho)' : '#aaa';
+  }
+  if (tabRegister) {
+    tabRegister.style.opacity = tab === 'register' ? '1' : '0.7';
+    tabRegister.style.borderBottomColor = tab === 'register' ? 'var(--amarelo)' : 'transparent';
+    tabRegister.style.color = tab === 'register' ? 'var(--vermelho)' : '#aaa';
+  }
   
   if (tab === 'login') {
     c.innerHTML = `
       <div class="form-group"><label>E-mail</label><input type="email" id="aEmail" placeholder="seu@exemplo.com"></div>
-      <div class="form-group"><label>Senha</label><input type="password" id="aPassword" placeholder="********"></div>
-      <div style="display:flex;gap:10px;margin-top:12px;"><button onclick="doLogin()" style="flex:1;background:var(--vermelho);color:white;padding:12px;border-radius:6px;border:none;font-weight:800;">Entrar</button><button onclick="showAuthTab('register')" style="flex:1;border:2px solid #eee;padding:12px;border-radius:6px;background:#fff;">Criar Conta</button></div>
+      <div class="form-group"><label>Senha</label><input type="password" id="aPassword" placeholder="••••••••"></div>
+      <div style="display:flex;gap:10px;margin-top:20px;"><button onclick="doLogin()" style="flex:1;background:var(--vermelho);color:white;padding:12px;border-radius:6px;border:none;font-weight:800;cursor:pointer;">🔓 Entrar</button><button onclick="showAuthTab('register')" style="flex:1;border:2px solid #eee;padding:12px;border-radius:6px;background:#fff;font-weight:700;cursor:pointer;">Criar Conta →</button></div>
     `;
   } else {
     c.innerHTML = `
       <div class="form-group"><label>Nome Completo</label><input type="text" id="rName" placeholder="Seu nome"></div>
       <div class="form-group"><label>E-mail</label><input type="email" id="rEmail" placeholder="seu@exemplo.com"></div>
-      <div class="form-group"><label>Senha</label><input type="password" id="rPassword" placeholder="********"></div>
-      <div class="form-group"><label>Confirmar Senha</label><input type="password" id="rPassword2" placeholder="********"></div>
-      <div style="display:flex;gap:10px;margin-top:12px;"><button onclick="doRegister()" style="flex:1;background:var(--amarelo);color:var(--vermelho);padding:12px;border-radius:6px;border:none;font-weight:800;">Cadastrar</button><button onclick="showAuthTab('login')" style="flex:1;border:2px solid #eee;padding:12px;border-radius:6px;background:#fff;">Voltar</button></div>
+      <div class="form-group"><label>Senha</label><input type="password" id="rPassword" placeholder="••••••••"></div>
+      <div class="form-group"><label>Confirmar Senha</label><input type="password" id="rPassword2" placeholder="••••••••"></div>
+      <div style="display:flex;gap:10px;margin-top:20px;"><button onclick="doRegister()" style="flex:1;background:var(--amarelo);color:var(--vermelho);padding:12px;border-radius:6px;border:none;font-weight:800;cursor:pointer;">✅ Cadastrar</button><button onclick="showAuthTab('login')" style="flex:1;border:2px solid #eee;padding:12px;border-radius:6px;background:#fff;font-weight:700;cursor:pointer;">← Voltar</button></div>
     `;
   }
 }
@@ -590,8 +616,24 @@ async function doRegister() {
   
   const user = await registerUser(name, email, pass);
   if (user) {
-    setCurrentUser({ name: user.name, email: user.email });
-    showToast('Conta criada com sucesso!');
+    // Salvar cliente no localStorage do admin
+    const existingCustomers = JSON.parse(localStorage.getItem('cia_customers') || '[]');
+    const customerExists = existingCustomers.some(c => c.email === email);
+    if (!customerExists) {
+      existingCustomers.push({
+        id: Date.now(),
+        name: name,
+        email: email,
+        phone: '',
+        cpf: '',
+        address: '',
+        created_at: new Date().toISOString()
+      });
+      localStorage.setItem('cia_customers', JSON.stringify(existingCustomers));
+    }
+    
+    setCurrentUser({ name: user.user?.name || name, email: user.user?.email || email });
+    showToast('✅ Conta criada com sucesso!');
     closeAuth();
   }
 }
@@ -603,8 +645,24 @@ async function doLogin() {
   
   const user = await loginUser(email, pass);
   if (user) {
-    setCurrentUser({ name: user.name, email: user.email });
-    showToast('Login realizado!');
+    // Salvar cliente no localStorage do admin se não existir
+    const existingCustomers = JSON.parse(localStorage.getItem('cia_customers') || '[]');
+    const customerExists = existingCustomers.some(c => c.email === email);
+    if (!customerExists) {
+      existingCustomers.push({
+        id: Date.now(),
+        name: user.user?.name || email.split('@')[0],
+        email: email,
+        phone: '',
+        cpf: '',
+        address: '',
+        created_at: new Date().toISOString()
+      });
+      localStorage.setItem('cia_customers', JSON.stringify(existingCustomers));
+    }
+    
+    setCurrentUser({ name: user.user?.name || email, email: user.user?.email || email });
+    showToast('✅ Login realizado!');
     closeAuth();
   }
 }
