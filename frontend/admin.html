@@ -369,8 +369,8 @@ tr:hover td { background: #faf7f2; }
     <!-- PRODUCTS -->
     <div class="page" id="page-products">
       <div class="table-toolbar">
-        <div class="search-box"><input type="text" placeholder="Buscar produto..." id="prodSearch" oninput="renderProductsTable()"></div>
-        <select id="prodCatFilter" onchange="renderProductsTable()" style="padding:10px 14px; border:2px solid #e8e0d4; border-radius:4px; font-size:13px; outline:none; font-family:Lato,sans-serif;">
+        <div class="search-box"><input type="text" placeholder="Buscar produto..." id="prodSearch" oninput="renderProductsTableAsync()"></div>
+        <select id="prodCatFilter" onchange="renderProductsTableAsync()" style="padding:10px 14px; border:2px solid #e8e0d4; border-radius:4px; font-size:13px; outline:none; font-family:Lato,sans-serif;">
           <option value="">Todas Categorias</option>
           <option value="Temperos">Temperos</option>
           <option value="Pimentas">Pimentas</option>
@@ -399,8 +399,8 @@ tr:hover td { background: #faf7f2; }
     <!-- ORDERS -->
     <div class="page" id="page-orders">
       <div class="table-toolbar">
-        <div class="search-box"><input type="text" placeholder="Buscar pedido ou cliente..." id="orderSearch" oninput="renderOrdersTable()"></div>
-        <select id="orderStatusFilter" onchange="renderOrdersTable()" style="padding:10px 14px; border:2px solid #e8e0d4; border-radius:4px; font-size:13px; outline:none; font-family:Lato,sans-serif;">
+        <div class="search-box"><input type="text" placeholder="Buscar pedido ou cliente..." id="orderSearch" oninput="renderOrdersTableAsync()"></div>
+        <select id="orderStatusFilter" onchange="renderOrdersTableAsync()" style="padding:10px 14px; border:2px solid #e8e0d4; border-radius:4px; font-size:13px; outline:none; font-family:Lato,sans-serif;">
           <option value="">Todos os Status</option>
           <option value="Pendente">Pendente</option>
           <option value="Processando">Processando</option>
@@ -583,8 +583,6 @@ async function saveProducts(products) {
   }
 }
 
-function getOrders() { /* será ajustado abaixo */ }
-function saveOrders(o) { /* será ajustado abaixo */ }
 function fmt(v) { return 'R$ ' + Number(v).toFixed(2).replace('.', ','); }
 function fmtDate(iso) { const d = new Date(iso); return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}); }
 function catEmoji(c) { return {'Pimentas':'🌶️','Especiarias':'✨','Ervas':'🌿','Temperos':'🧂','Molhos':'🫙'}[c] || '🌶️'; }
@@ -603,11 +601,11 @@ function showPage(page, el) {
   if (el) el.classList.add('active');
   const titles = { dashboard: 'Dashboard', products: 'Produtos', customers: 'Clientes', orders: 'Pedidos', reports: 'Relatórios' };
   document.getElementById('pageTitle').textContent = titles[page] || page;
-  if (page === 'dashboard') renderDashboard();
+  if (page === 'dashboard') renderDashboard().catch(e => console.error(e));
   else if (page === 'products') renderProductsTable().catch(e => console.error(e));
   else if (page === 'customers') renderCustomersTable().catch(e => console.error(e));
-  else if (page === 'orders') renderOrdersTable();
-  else if (page === 'reports') renderReports('7');
+  else if (page === 'orders') renderOrdersTable().catch(e => console.error(e));
+  else if (page === 'reports') renderReports('7').catch(e => console.error(e));
 }
 
 async function reloadAll() {
@@ -617,9 +615,18 @@ async function reloadAll() {
   showToast('✅ Dados atualizados!');
 }
 
+// Wrappers para event handlers async
+async function renderProductsTableAsync() {
+  renderProductsTable().catch(e => console.error(e));
+}
+
+async function renderOrdersTableAsync() {
+  renderOrdersTable().catch(e => console.error(e));
+}
+
 async function updateSidebarCounts() {
   const products = await getProducts();
-  const orders = getOrders();
+  const orders = await getOrders();
   const customers = await getCustomers();
   document.getElementById('prodCount').textContent = products.filter(p => p.active).length;
   document.getElementById('ordersCount').textContent = orders.filter(o => o.status === 'Pendente').length;
@@ -629,9 +636,9 @@ async function updateSidebarCounts() {
 // ===== DASHBOARD =====
 let currentPeriod = 'week';
 
-function renderDashboard() {
-  const orders = getOrders();
-  const products = getProducts();
+async function renderDashboard() {
+  const orders = await getOrders();
+  const products = await getProducts();
   const revenue = orders.reduce((s, o) => s + (o.total || 0), 0);
   const pending = orders.filter(o => o.status === 'Pendente').length;
 
@@ -640,7 +647,7 @@ function renderDashboard() {
   document.getElementById('dash-revenue').textContent = 'R$ ' + Math.round(revenue);
   document.getElementById('dash-pending').textContent = pending;
 
-  renderSalesChart(currentPeriod);
+  await renderSalesChart(currentPeriod);
   renderRecentOrders(orders.slice(0, 5));
   renderLowStock(products);
   renderTopProducts(orders, products);
@@ -651,11 +658,11 @@ function changePeriod(period, btn) {
   currentPeriod = period;
   document.querySelectorAll('.period-tab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  renderSalesChart(period);
+  renderSalesChart(period).catch(e => console.error(e));
 }
 
-function renderSalesChart(period) {
-  const orders = getOrders();
+async function renderSalesChart(period) {
+  const orders = await getOrders();
   const chart = document.getElementById('salesChart');
   let labels = [], days = 0;
 
@@ -782,7 +789,7 @@ async function saveCustomers(customers) {
 
 async function renderCustomersTable() {
   const search = document.getElementById('customersSearch')?.value.toLowerCase() || '';
-  const orders = getOrders();
+  const orders = await getOrders();
   let customers = await getCustomers();
 
   if (search) {
@@ -821,14 +828,14 @@ async function renderCustomersTable() {
   }).join('');
 }
 
-function filterCustomersTable() {
-  renderCustomersTable();
+async function filterCustomersTable() {
+  await renderCustomersTable();
 }
 
 async function viewCustomerDetails(email) {
   const customers = await getCustomers();
   const customer = customers.find(c => c.email === email);
-  const orders = getOrders().filter(o => o.customer_email === email);
+  const orders = (await getOrders()).filter(o => o.customer_email === email);
   
   if (!customer) return;
   
@@ -890,7 +897,7 @@ function deleteCustomer(email) {
 
 async function exportCustomers() {
   const customers = await getCustomers();
-  const orders = getOrders();
+  const orders = await getOrders();
   
   const csv = ['Nome,Email,Telefone,CPF,Pedidos,Total Gasto,Data Cadastro'];
   customers.forEach(c => {
@@ -911,7 +918,7 @@ async function exportCustomers() {
 }
 
 async function exportOrders() {
-  const orders = getOrders();
+  const orders = await getOrders();
   const customers = await getCustomers();
   
   const csv = ['ID Pedido,Cliente,Email,Telefone,Data,Subtotal,Frete,Total,Forma de Pagamento,Status Pedido,Status Pagamento'];
@@ -934,9 +941,9 @@ async function exportOrders() {
   showToast('✅ Pedidos exportados!');
 }
 
-function exportReports() {
-  const orders = getOrders();
-  const products = getProducts();
+async function exportReports() {
+  const orders = await getOrders();
+  const products = await getProducts();
   
   const today = new Date();
   const days = parseInt(reportDays) || 7;
@@ -1056,14 +1063,6 @@ function openAddProduct() {
   document.getElementById('productModal').classList.add('open');
 }
 
-function openEditProduct(id) {
-  editingProductId = id;
-  const p = getProducts().find(x => x.id === id);
-  if (!p) return;
-  document.getElementById('productModalTitle').textContent = '✏️ Editar Produto';
-  document.getElementById('productModalBody').innerHTML = productForm(p);
-  document.getElementById('productModal').classList.add('open');
-}
 
 function productForm(p) {
   return `
@@ -1286,91 +1285,10 @@ async function deleteProduct(id) {
 }
 
 // ===== ORDERS TABLE =====
-function renderOrdersTable() {
-  const search = document.getElementById('orderSearch').value.toLowerCase();
-  const statusFilter = document.getElementById('orderStatusFilter').value;
-  let orders = getOrders();
-  if (search) orders = orders.filter(o => o.id.toLowerCase().includes(search) || o.customer?.name?.toLowerCase().includes(search) || o.customer?.email?.toLowerCase().includes(search));
-  if (statusFilter) orders = orders.filter(o => o.status === statusFilter);
-
-  const tbody = document.getElementById('ordersTableBody');
-  if (orders.length === 0) { tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><span class="icon">📦</span><p>Nenhum pedido encontrado</p></div></td></tr>'; return; }
-
-  tbody.innerHTML = orders.map(o => `
-    <tr>
-      <td><strong style="font-family:monospace;font-size:12px;color:var(--vermelho)">${o.id}</strong></td>
-      <td>
-        <div style="font-weight:700;font-size:13px">${o.customer?.name || '—'}</div>
-        <div style="font-size:11px;color:#aaa">${o.customer?.email || ''}</div>
-      </td>
-      <td style="font-size:12px;color:#888">${fmtDate(o.createdAt)}</td>
-      <td><strong>${fmt(o.total)}</strong></td>
-      <td><span style="font-size:12px">${o.payment || '—'}</span></td>
-      <td><span class="status-pill ps-${(o.paymentStatus||'aguardando').toLowerCase()}">${o.paymentStatus || 'Aguardando'}</span></td>
-      <td><span class="status-pill s-${(o.status||'pendente').toLowerCase()}">${o.status || 'Pendente'}</span></td>
-      <td><button class="btn btn-sm btn-secondary" onclick="openOrderModal('${o.id}')">👁 Detalhes</button></td>
-    </tr>
-  `).join('');
-}
 
 // ===== ORDER MODAL =====
 let editingOrderId = null;
 
-function openOrderModal(id) {
-  editingOrderId = id;
-  const order = getOrders().find(o => o.id === id);
-  if (!order) return;
-
-  document.getElementById('orderModalTitle').textContent = '📦 Pedido ' + id;
-  document.getElementById('orderModalBody').innerHTML = `
-    <div class="order-detail">
-      <div class="order-detail-grid">
-        <div class="detail-section">
-          <h4>👤 Dados do Cliente</h4>
-          <div class="detail-row"><span>Nome</span><strong>${order.customer?.name||'—'}</strong></div>
-          <div class="detail-row"><span>E-mail</span><strong>${order.customer?.email||'—'}</strong></div>
-          <div class="detail-row"><span>Telefone</span><strong>${order.customer?.phone||'—'}</strong></div>
-          <div class="detail-row"><span>CPF</span><strong>${order.customer?.cpf||'—'}</strong></div>
-          <div class="detail-row"><span>Endereço</span><strong>${order.customer?.address||'—'}</strong></div>
-        </div>
-        <div class="detail-section">
-          <h4>💳 Dados do Pedido</h4>
-          <div class="detail-row"><span>Pedido</span><strong>${order.id}</strong></div>
-          <div class="detail-row"><span>Data</span><strong>${fmtDate(order.createdAt)}</strong></div>
-          <div class="detail-row"><span>Pagamento</span><strong>${order.payment||'—'}</strong></div>
-          <div class="detail-row"><span>Subtotal</span><strong>${fmt(order.subtotal||0)}</strong></div>
-          <div class="detail-row"><span>Frete</span><strong>${order.frete===0?'Grátis':fmt(order.frete||0)}</strong></div>
-          <div class="detail-row"><span>Total</span><strong style="color:var(--vermelho)">${fmt(order.total||0)}</strong></div>
-        </div>
-      </div>
-
-      <h4 style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--vermelho);margin-bottom:10px">🛒 Itens do Pedido</h4>
-      <table class="order-items-table">
-        <thead><tr><th>Produto</th><th>Qtd</th><th>Preço Unit.</th><th>Total</th></tr></thead>
-        <tbody>${(order.items||[]).map(i => `
-          <tr>
-            <td><strong>${i.name}</strong></td>
-            <td>${i.qty}</td>
-            <td>${fmt(i.price)}</td>
-            <td>${fmt(i.price*i.qty)}</td>
-          </tr>
-        `).join('')}</tbody>
-      </table>
-
-      <div class="control-group">
-        <label>Status do Pedido:</label>
-        <select id="editOrderStatus">
-          ${['Pendente','Processando','Enviado','Entregue','Cancelado'].map(s => `<option value="${s}" ${order.status===s?'selected':''}>${s}</option>`).join('')}
-        </select>
-        <label style="margin-left:20px">Status do Pagamento:</label>
-        <select id="editPaymentStatus">
-          ${['Aguardando','Pago','Estornado'].map(s => `<option value="${s}" ${order.paymentStatus===s?'selected':''}>${s}</option>`).join('')}
-        </select>
-      </div>
-    </div>
-  `;
-  document.getElementById('orderModal').classList.add('open');
-}
 
 function closeOrderModal() { document.getElementById('orderModal').classList.remove('open'); }
 
@@ -1387,23 +1305,23 @@ function saveOrderStatus() {
 
   saveOrders(orders);
   closeOrderModal();
-  renderOrdersTable();
-  renderDashboard();
+  renderOrdersTable().catch(e => console.error(e));
+  renderDashboard().catch(e => console.error(e));
   showToast('✅ Pedido atualizado: ' + newStatus + ' / ' + newPayment);
 }
 
 // ===== REPORTS =====
 let reportDays = '7';
 
-function changeReportPeriod(days, btn) {
+async function changeReportPeriod(days, btn) {
   reportDays = days;
   document.querySelectorAll('.period-tab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  renderReports(days);
+  await renderReports(days);
 }
 
-function renderReports(days) {
-  const orders = getOrders();
+async function renderReports(days) {
+  const orders = await getOrders();
   const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - parseInt(days));
   const filtered = orders.filter(o => new Date(o.createdAt) >= cutoff);
 

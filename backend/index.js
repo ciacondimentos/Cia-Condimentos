@@ -32,7 +32,5 @@ app.use('/api/auth', authRoutes);
 app.use('/api/products', productsRoutes);
 app.use('/api/orders', ordersRoutes);
 
-app.get('/', (req, res) => res.json({ ok: true, msg: 'Cia Backend running' }));
-
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server listening on port ${PORT}`));
