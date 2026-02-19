@@ -827,6 +827,7 @@ async function doLogin() {
       localStorage.setItem('authToken', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
       showToast('✅ Login realizado com sucesso!');
+      updateAuthUI(data.user);
       closeAuth();
     } else {
       // Credenciais inválidas
@@ -835,6 +836,43 @@ async function doLogin() {
   } catch (e) {
     console.error('Erro no login:', e);
     showToast('❌ Erro ao conectar com o servidor');
+  }
+}
+
+function updateAuthUI(user) {
+  const authContainer = document.querySelector('.auth-btn').parentElement;
+  authContainer.innerHTML = `
+    <span style="color: var(--amarelo); font-weight: 700; margin-right: 12px;">Bem vindo ${user.name}!</span>
+    <button class="auth-btn" onclick="logout()" style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.3);">Sair</button>
+  `;
+}
+
+function logout() {
+  localStorage.removeItem('authToken');
+  localStorage.removeItem('user');
+  const authContainer = document.querySelector('.auth-btn').parentElement;
+  authContainer.innerHTML = `
+    <button class="cart-btn" onclick="toggleCart()">🛒 Carrinho <span class="cart-badge" id="cartBadge">0</span></button>
+    <button class="auth-btn" onclick="openAuth()">Entrar / Cadastrar</button>
+  `;
+  // Re-adicionar event listeners
+  setupModalListeners();
+  // Atualizar badge do carrinho
+  updateCartBadge();
+  showToast('✅ Você foi desconectado');
+}
+
+function checkAuthStatus() {
+  const user = localStorage.getItem('user');
+  if (user) {
+    try {
+      const userData = JSON.parse(user);
+      updateAuthUI(userData);
+    } catch (e) {
+      console.error('Erro ao parsear dados do usuário:', e);
+      localStorage.removeItem('user');
+      localStorage.removeItem('authToken');
+    }
   }
 }
 
@@ -1072,6 +1110,9 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Adicionar event listeners
   setupModalListeners();
+  
+  // Verificar se usuário já está logado
+  checkAuthStatus();
   
   renderProducts();
 });
