@@ -880,15 +880,17 @@ function exportReports() {
   const products = getProducts();
   
   const today = new Date();
-  const last7Days = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-  const recentOrders = orders.filter(o => new Date(o.created_at || Date.now()) >= last7Days);
+  const days = parseInt(reportDays) || 7;
+  const startDate = new Date(today.getTime() - days * 24 * 60 * 60 * 1000);
+  const recentOrders = orders.filter(o => new Date(o.created_at || Date.now()) >= startDate);
   
   const csv = [];
   csv.push('===== RELATÓRIO DE VENDAS =====');
   csv.push(`Data de Geração: ${today.toLocaleDateString('pt-BR')}`);
+  csv.push(`Período: Últimos ${days} dias`);
   csv.push('');
   
-  csv.push('--- RESUMO GERAL (Últimos 7 dias) ---');
+  csv.push(`--- RESUMO GERAL (Últimos ${days} dias) ---`);
   const totalRevenue = recentOrders.reduce((s, o) => s + (o.total || 0), 0);
   const totalOrders = recentOrders.length;
   const avgOrder = totalOrders > 0 ? totalRevenue / totalOrders : 0;
