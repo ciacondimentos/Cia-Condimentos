@@ -71,9 +71,9 @@
   .add-cart-btn:disabled { background: #ccc; cursor: not-allowed; transform: none; }
 
   .cart-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 200; display: none; }
-  .cart-overlay.open { display: block; }
-  .cart-sidebar { position: fixed; top: 0; right: -500px; width: 440px; height: 100vh; background: white; z-index: 201; display: flex; flex-direction: column; transition: right 0.3s; box-shadow: -8px 0 40px rgba(0,0,0,0.2); }
-  .cart-sidebar.open { right: 0; }
+  .cart-overlay.open { display: block !important; visibility: visible !important; }
+  .cart-sidebar { position: fixed; top: 0; right: -500px; width: 440px; height: 100vh; background: white; z-index: 201; display: flex; flex-direction: column; transition: right 0.3s; box-shadow: -8px 0 40px rgba(0,0,0,0.2); visibility: hidden; }
+  .cart-sidebar.open { right: 0 !important; display: flex !important; visibility: visible !important; }
   .cart-header { background: var(--vermelho); color: white; padding: 24px; display: flex; justify-content: space-between; align-items: center; }
   .cart-header h3 { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; }
   .cart-close { background: none; border: none; color: white; font-size: 24px; cursor: pointer; }
@@ -98,8 +98,8 @@
   .empty-cart { text-align: center; padding: 60px 20px; color: #aaa; }
   .empty-cart .icon { font-size: 60px; display: block; margin-bottom: 16px; }
 
-  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 300; display: none; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
-  .modal-overlay.open { display: flex; }
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 300; display: none; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; visibility: hidden; }
+  .modal-overlay.open { display: flex !important; visibility: visible !important; }
   .modal { background: white; border-radius: 12px; max-width: 560px; width: 100%; overflow: hidden; animation: modalIn 0.3s ease; }
   @keyframes modalIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
   .modal-header { background: var(--vermelho); padding: 24px 28px; color: white; display: flex; justify-content: space-between; align-items: center; }
@@ -138,7 +138,7 @@
 
 <div id="toast" class="toast"></div>
 
-<div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+<div class="cart-overlay" id="cartOverlay" onclick="if(event.target === this) { event.stopPropagation(); toggleCart(event); }"></div>
 <div class="cart-sidebar" id="cartSidebar">
   <div class="cart-header">
     <h3>🛒 Seu Carrinho</h3>
@@ -151,8 +151,8 @@
   </div>
 </div>
 
-<div class="modal-overlay" id="checkoutModal">
-  <div class="modal">
+<div class="modal-overlay" id="checkoutModal" onclick="if(event.target === this) closeCheckout()">
+  <div class="modal" onclick="event.stopPropagation();">
     <div class="modal-header">
       <h3>🌶️ Finalizar Pedido</h3>
       <button style="background:none;border:none;color:white;font-size:24px;cursor:pointer" onclick="closeCheckout()">✕</button>
@@ -161,8 +161,8 @@
   </div>
 </div>
 
-<div class="modal-overlay" id="authModal">
-  <div class="modal">
+<div class="modal-overlay" id="authModal" onclick="if(event.target === this) closeAuth()">
+  <div class="modal" onclick="event.stopPropagation();">
     <div class="modal-header">
       <h3 id="authTitle">🔐 Entrar / Cadastrar</h3>
       <button style="background:none;border:none;color:white;font-size:24px;cursor:pointer" onclick="closeAuth()">✕</button>
@@ -176,13 +176,12 @@
     </div>
   </div>
 </div>
-  </div>
-</div>
 
 <header>
   <div class="header-top">✦ FRETE GRÁTIS A PARTIR DE R$ 50 - ABAIXO DISSO, TAXA DE R$ 10 POR ENTREGA ✦ CONDIMENTOS E ESPECIARIAS ✦</div>
   <div class="header-main">
     <div class="logo-wrap">
+      <img src="img/logotipooficialciadecondimentos.png" alt="Cia de Condimentos" class="logo-icon" />
       <div>
         <div class="logo-title">Cia de<br>Condimentos</div>
         <div class="logo-sub">Especiarias Premium</div>
@@ -194,7 +193,7 @@
       <a href="#contato">Contato</a>
     </nav>
     <div style="display:flex;align-items:center;gap:12px;">
-      <button class="cart-btn" onclick="toggleCart()">🛒 Carrinho <span class="cart-badge" id="cartBadge">0</span></button>
+      <button class="cart-btn" onclick="event.stopPropagation(); toggleCart(event);">🛒 Carrinho <span class="cart-badge" id="cartBadge">0</span></button>
       <button class="auth-btn" id="authBtn" onclick="openAuth()">Entrar / Cadastrar</button>
     </div>
   </div>
@@ -242,6 +241,16 @@ function getApiUrl() {
   return 'https://cia-condimentos.onrender.com/api';
 }
 
+// Função auxiliar para encontrar elementos de forma robusta
+function safeGetElement(id) {
+  let el = document.getElementById(id);
+  if (!el) {
+    console.warn(`⚠️ Elemento ${id} não encontrado, procurando no documento...`);
+    el = document.querySelector(`[id="${id}"]`);
+  }
+  return el;
+}
+
 const API_URL = getApiUrl();
 let cart = [], currentFilter = 'all', currentSearch = '', currentUser = null;
 
@@ -276,12 +285,12 @@ async function submitOrderToAPI(orderData) {
   return null;
 }
 
-async function registerUser(name, email, password) {
+async function registerUser(name, email, password, phone, cpf, address) {
   try {
     const response = await fetch(`${API_URL}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, password })
+      body: JSON.stringify({ name, email, password, phone, cpf, address })
     });
     if (response.ok) return await response.json();
     const error = await response.json();
@@ -322,12 +331,16 @@ function getCurrentUser() {
   return currentUser; 
 }
 
-function toggleCart() {
-  const sidebar = document.getElementById('cartSidebar');
-  const overlay = document.getElementById('cartOverlay');
+function toggleCart(e) {
+  console.log('🛒 toggleCart chamado, e=', e);
+  if (e) e.stopPropagation();
+  const sidebar = safeGetElement('cartSidebar');
+  const overlay = safeGetElement('cartOverlay');
+  console.log('sidebar:', sidebar, 'overlay:', overlay);
   if (sidebar && overlay) {
     sidebar.classList.toggle('open');
     overlay.classList.toggle('open');
+    console.log('✅ Toggled - open?', sidebar.classList.contains('open'));
     renderCart();
   }
 }
@@ -360,7 +373,7 @@ async function changeQty(id, delta) {
 }
 
 function updateCartBadge() { 
-  const badge = document.getElementById('cartBadge');
+  const badge = safeGetElement('cartBadge');
   if (badge) badge.textContent = cart.reduce((s, i) => s + i.qty, 0);
 }
 function getCartTotal() { return cart.reduce((s, i) => s + i.price * i.qty, 0); }
@@ -370,8 +383,8 @@ function fmt(v) {
 }
 
 function renderCart() {
-  const container = document.getElementById('cartItems');
-  const totalEl = document.getElementById('cartTotal');
+  const container = safeGetElement('cartItems');
+  const totalEl = safeGetElement('cartTotal');
   if (!container || !totalEl) return;
   totalEl.textContent = fmt(getCartTotal());
   if (cart.length === 0) { container.innerHTML = '<div class="empty-cart"><span class="icon">🛒</span><p>Seu carrinho está vazio</p></div>'; return; }
@@ -417,7 +430,7 @@ async function renderProducts() {
     );
   }
   
-  const container = document.getElementById('productsGrid');
+  const container = safeGetElement('productsGrid');
   if (!container) {
     console.error('Elemento productsGrid não encontrado no DOM');
     return;
@@ -447,10 +460,11 @@ async function renderProducts() {
 }
 
 function openCheckout() {
+  console.log('💳 openCheckout chamado');
   if (cart.length === 0) { showToast('Adicione produtos ao carrinho!'); return; }
   const total = getCartTotal();
   const frete = total >= 50 ? 0 : 10.00;
-  const checkoutBody = document.getElementById('checkoutBody');
+  const checkoutBody = safeGetElement('checkoutBody');
   if (!checkoutBody) return;
   checkoutBody.innerHTML = `
     <div class="order-summary">
@@ -460,42 +474,50 @@ function openCheckout() {
       <div class="summary-total"><span>Total</span><span style="color:var(--vermelho)">${fmt(total+frete)}</span></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>Nome Completo</label><input type="text" id="cName" placeholder="Seu nome completo"></div>
-      <div class="form-group"><label>E-mail</label><input type="email" id="cEmail" placeholder="email@exemplo.com"></div>
+      <div class="form-group"><label for="cName">Nome Completo</label><input type="text" id="cName" placeholder="Seu nome completo"></div>
+      <div class="form-group"><label for="cEmail">E-mail</label><input type="email" id="cEmail" placeholder="email@exemplo.com"></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>Telefone</label><input type="text" id="cPhone" placeholder="(00) 00000-0000"></div>
-      <div class="form-group"><label>CPF</label><input type="text" id="cCpf" placeholder="000.000.000-00"></div>
+      <div class="form-group"><label for="cPhone">Telefone</label><input type="text" id="cPhone" placeholder="(00) 00000-0000"></div>
+      <div class="form-group"><label for="cCpf">CPF</label><input type="text" id="cCpf" placeholder="000.000.000-00"></div>
     </div>
-    <div class="form-group"><label>Endereço Completo</label><input type="text" id="cAddress" placeholder="Rua, número, bairro, complemento"></div>
+    <div class="form-group"><label for="cAddress">Endereço Completo</label><input type="text" id="cAddress" placeholder="Rua, número, bairro, complemento"></div>
     <div class="form-row">
-      <div class="form-group"><label>Cidade / Estado</label><input type="text" id="cCity" placeholder="Cidade - UF"></div>
-      <div class="form-group"><label>CEP</label><input type="text" id="cCep" placeholder="00000-000"></div>
+      <div class="form-group"><label for="cCity">Cidade / Estado</label><input type="text" id="cCity" placeholder="Cidade - UF"></div>
+      <div class="form-group"><label for="cCep">CEP</label><input type="text" id="cCep" placeholder="00000-000"></div>
     </div>
     <div class="form-group">
-      <label>Forma de Pagamento</label>
+      <label for="cPayment">Forma de Pagamento</label>
       <select id="cPayment"><option value="PIX">PIX</option><option value="Cartão de Crédito">Cartão de Crédito</option><option value="Cartão de Débito">Cartão de Débito</option><option value="Boleto">Boleto Bancário</option></select>
     </div>
     <button class="submit-order-btn" onclick="submitOrder(${frete})">✅ Confirmar Pedido</button>
   `;
-  const modal = document.getElementById('checkoutModal');
-  if (modal) modal.classList.add('open');
+  const modal = safeGetElement('checkoutModal');
+  console.log('checkoutModal:', modal);
+  if (modal) {
+    modal.classList.add('open');
+    console.log('✅ checkoutModal class open adicionado');
+  }
 }
 
 function closeCheckout() { 
-  const modal = document.getElementById('checkoutModal');
-  if (modal) modal.classList.remove('open');
+  console.log('❌ closeCheckout chamado');
+  const modal = safeGetElement('checkoutModal');
+  if (modal) {
+    modal.classList.remove('open');
+    console.log('✅ checkoutModal class open removido');
+  }
 }
 
 async function submitOrder(frete) {
-  const name = document.getElementById('cName').value.trim();
-  const email = document.getElementById('cEmail').value.trim();
-  const phone = document.getElementById('cPhone').value.trim();
-  const cpf = document.getElementById('cCpf').value.trim();
-  const address = document.getElementById('cAddress').value.trim();
-  const city = document.getElementById('cCity').value.trim();
-  const cep = document.getElementById('cCep').value.trim();
-  const payment = document.getElementById('cPayment').value;
+  const name = safeGetElement('cName')?.value.trim();
+  const email = safeGetElement('cEmail')?.value.trim();
+  const phone = safeGetElement('cPhone')?.value.trim();
+  const cpf = safeGetElement('cCpf')?.value.trim();
+  const address = safeGetElement('cAddress')?.value.trim();
+  const city = safeGetElement('cCity')?.value.trim();
+  const cep = safeGetElement('cCep')?.value.trim();
+  const payment = safeGetElement('cPayment')?.value;
 
   if (!name || !email || !phone || !address || !city || !cep) { 
     showToast('⚠️ Preencha todos os campos obrigatórios!'); 
@@ -517,14 +539,13 @@ async function submitOrder(frete) {
   const result = await submitOrderToAPI(orderData);
   if (!result) return;
 
-  // Salvar cliente no admin
   const existingCustomers = JSON.parse(localStorage.getItem('cia_customers') || '[]');
-  const customerExists = existingCustomers.some(c => c.email === name_client);
+  const customerExists = existingCustomers.some(c => c.email === email);
   if (!customerExists) {
     existingCustomers.push({
       id: Date.now(),
-      name: name_client,
-      email: name_client,
+      name: name,
+      email: email,
       phone: phone,
       cpf: cpf,
       address: address,
@@ -532,11 +553,27 @@ async function submitOrder(frete) {
     });
     localStorage.setItem('cia_customers', JSON.stringify(existingCustomers));
   }
+  // Salvar cliente no banco de dados via backend
+  try {
+    await fetch(`${API_URL}/customers`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: name,
+        email: email,
+        phone: phone,
+        cpf: cpf,
+        address: address
+      })
+    });
+  } catch (e) {
+    showToast('Erro ao salvar cliente no banco de dados.');
+  }
   
   const orderId = result.id;
   cart = [];
   updateCartBadge();
-
+safeGetElement
   const checkoutBody = document.getElementById('checkoutBody');
   if (checkoutBody) {
     checkoutBody.innerHTML = `
@@ -553,7 +590,7 @@ async function submitOrder(frete) {
 }
 
 function showToast(msg) {
-  const t = document.getElementById('toast');
+  const t = safeGetElement('toast');
   if (!t) return;
   t.textContent = msg;
   t.classList.add('show');
@@ -561,20 +598,37 @@ function showToast(msg) {
 }
 
 function openAuth() { 
-  showAuthTab('login'); 
-  const modal = document.getElementById('authModal');
-  if (modal) modal.classList.add('open');
+  console.log('🔐 openAuth chamado');
+  setTimeout(() => {
+    showAuthTab('login');
+    const modal = safeGetElement('authModal');
+    console.log('authModal:', modal);
+    if (modal) {
+      modal.classList.add('open');
+      console.log('✅ authModal class open adicionado');
+    } else {
+      console.error('❌ authModal NÃO ENCONTRADO!');
+    }
+  }, 10);
 }
 
-function closeAuth() { 
-  const modal = document.getElementById('authModal');
-  if (modal) modal.classList.remove('open');
+function closeAuth(e) {
+  console.log('❌ closeAuth chamado, e=', e);
+  if (e) e.stopPropagation();
+  setTimeout(() => {
+    const modal = safeGetElement('authModal');
+    console.log('authModal para fechar:', modal);
+    if (modal) {
+      modal.classList.remove('open');
+      console.log('✅ authModal class open removido');
+    }
+  }, 10);
 }
 
 function showAuthTab(tab) {
-  const tabLogin = document.getElementById('tabLogin');
-  const tabRegister = document.getElementById('tabRegister');
-  const c = document.getElementById('authContent');
+  const tabLogin = safeGetElement('tabLogin');
+  const tabRegister = safeGetElement('tabRegister');
+  const c = safeGetElement('authContent');
   
   if (!c) return;
   
@@ -591,47 +645,37 @@ function showAuthTab(tab) {
   
   if (tab === 'login') {
     c.innerHTML = `
-      <div class="form-group"><label>E-mail</label><input type="email" id="aEmail" placeholder="seu@exemplo.com"></div>
-      <div class="form-group"><label>Senha</label><input type="password" id="aPassword" placeholder="••••••••"></div>
+      <div class="form-group"><label for="aEmail">E-mail</label><input type="email" id="aEmail" placeholder="seu@exemplo.com"></div>
+      <div class="form-group"><label for="aPassword">Senha</label><input type="password" id="aPassword" placeholder="••••••••"></div>
       <div style="display:flex;gap:10px;margin-top:20px;"><button onclick="doLogin()" style="flex:1;background:var(--vermelho);color:white;padding:12px;border-radius:6px;border:none;font-weight:800;cursor:pointer;">🔓 Entrar</button><button onclick="showAuthTab('register')" style="flex:1;border:2px solid #eee;padding:12px;border-radius:6px;background:#fff;font-weight:700;cursor:pointer;">Criar Conta →</button></div>
     `;
   } else {
     c.innerHTML = `
-      <div class="form-group"><label>Nome Completo</label><input type="text" id="rName" placeholder="Seu nome"></div>
-      <div class="form-group"><label>E-mail</label><input type="email" id="rEmail" placeholder="seu@exemplo.com"></div>
-      <div class="form-group"><label>Senha</label><input type="password" id="rPassword" placeholder="••••••••"></div>
-      <div class="form-group"><label>Confirmar Senha</label><input type="password" id="rPassword2" placeholder="••••••••"></div>
+      <div class="form-group"><label for="rName">Nome Completo</label><input type="text" id="rName" placeholder="Seu nome"></div>
+      <div class="form-group"><label for="rEmail">E-mail</label><input type="email" id="rEmail" placeholder="seu@exemplo.com"></div>
+      <div class="form-group"><label for="rPhone">Telefone</label><input type="text" id="rPhone" placeholder="(00) 00000-0000"></div>
+      <div class="form-group"><label for="rCpf">CPF</label><input type="text" id="rCpf" placeholder="000.000.000-00"></div>
+      <div class="form-group"><label for="rAddress">Endereço para Entrega</label><input type="text" id="rAddress" placeholder="Rua, número, bairro, complemento"></div>
+      <div class="form-group"><label for="rPassword">Senha</label><input type="password" id="rPassword" placeholder="••••••••"></div>
+      <div class="form-group"><label for="rPassword2">Confirmar Senha</label><input type="password" id="rPassword2" placeholder="••••••••"></div>
       <div style="display:flex;gap:10px;margin-top:20px;"><button onclick="doRegister()" style="flex:1;background:var(--amarelo);color:var(--vermelho);padding:12px;border-radius:6px;border:none;font-weight:800;cursor:pointer;">✅ Cadastrar</button><button onclick="showAuthTab('login')" style="flex:1;border:2px solid #eee;padding:12px;border-radius:6px;background:#fff;font-weight:700;cursor:pointer;">← Voltar</button></div>
     `;
   }
 }
 
 async function doRegister() {
-  const name = document.getElementById('rName').value.trim();
-  const email = document.getElementById('rEmail').value.trim().toLowerCase();
-  const pass = document.getElementById('rPassword').value;
-  const pass2 = document.getElementById('rPassword2').value;
-  if (!name || !email || !pass) { showToast('Preencha todos os campos.'); return; }
+  const name = safeGetElement('rName')?.value.trim();
+  const email = safeGetElement('rEmail')?.value.trim().toLowerCase();
+  const phone = safeGetElement('rPhone')?.value.trim();
+  const cpf = safeGetElement('rCpf')?.value.trim();
+  const address = safeGetElement('rAddress')?.value.trim();
+  const pass = safeGetElement('rPassword')?.value;
+  const pass2 = safeGetElement('rPassword2')?.value;
+  if (!name || !email || !phone || !cpf || !address || !pass) { showToast('Preencha todos os campos.'); return; }
   if (pass !== pass2) { showToast('As senhas não coincidem.'); return; }
-  
-  const user = await registerUser(name, email, pass);
+
+  const user = await registerUser(name, email, pass, phone, cpf, address);
   if (user) {
-    // Salvar cliente no localStorage do admin
-    const existingCustomers = JSON.parse(localStorage.getItem('cia_customers') || '[]');
-    const customerExists = existingCustomers.some(c => c.email === email);
-    if (!customerExists) {
-      existingCustomers.push({
-        id: Date.now(),
-        name: name,
-        email: email,
-        phone: '',
-        cpf: '',
-        address: '',
-        created_at: new Date().toISOString()
-      });
-      localStorage.setItem('cia_customers', JSON.stringify(existingCustomers));
-    }
-    
     setCurrentUser({ name: user.user?.name || name, email: user.user?.email || email });
     showToast('✅ Conta criada com sucesso!');
     closeAuth();
@@ -639,8 +683,8 @@ async function doRegister() {
 }
 
 async function doLogin() {
-  const email = (document.getElementById('aEmail').value || '').trim().toLowerCase();
-  const pass = document.getElementById('aPassword').value || '';
+  const email = (safeGetElement('aEmail')?.value || '').trim().toLowerCase();
+  const pass = safeGetElement('aPassword')?.value || '';
   if (!email || !pass) { showToast('Preencha e-mail e senha.'); return; }
   
   const user = await loginUser(email, pass);
@@ -670,16 +714,25 @@ async function doLogin() {
 function doLogout() { clearCurrentUser(); showToast('Desconectado.'); }
 
 function updateAuthUI() {
-  const container = document.getElementById('authBtn');
+  const container = safeGetElement('authBtn');
+  const userBadge = safeGetElement('userBadge');
   const user = getCurrentUser();
   if (!container) return;
   if (user) {
-    container.outerHTML = `<div class="user-badge" id="userBadge">Olá, ${escapeHtml(user.name.split(' ')[0] || user.email)} <button style="margin-left:10px;background:none;border:none;cursor:pointer;font-weight:700;" onclick="doLogout()">Sair</button></div>`;
-  } else {
-    if (!document.getElementById('authBtn')) {
-      const after = document.querySelector('.cart-btn');
-      if (after) { after.insertAdjacentHTML('afterend', '<button class="auth-btn" id="authBtn" onclick="openAuth()">Entrar / Cadastrar</button>'); }
+    container.style.display = 'none';
+    if (!userBadge) {
+      const badge = document.createElement('div');
+      badge.id = 'userBadge';
+      badge.className = 'user-badge';
+      badge.innerHTML = `Olá, ${escapeHtml(user.name.split(' ')[0] || user.email)} <button style="margin-left:10px;background:none;border:none;cursor:pointer;font-weight:700;color:var(--vermelho);" onclick="doLogout()">Sair</button>`;
+      container.parentNode.insertBefore(badge, container.nextSibling);
+    } else {
+      userBadge.innerHTML = `Olá, ${escapeHtml(user.name.split(' ')[0] || user.email)} <button style="margin-left:10px;background:none;border:none;cursor:pointer;font-weight:700;color:var(--vermelho);" onclick="doLogout()">Sair</button>`;
     }
+  } else {
+    container.style.display = 'block';
+    const badge = safeGetElement('userBadge');
+    if (badge) badge.remove();
   }
 }
 
@@ -687,6 +740,11 @@ function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp
 
 // Initialize page
 document.addEventListener('DOMContentLoaded', () => {
+  // Remover classes injetadas por extensões que ocultam elementos
+  document.querySelectorAll('.hide_modal').forEach(el => {
+    el.classList.remove('hide_modal');
+    el.style.display = '';
+  });
   renderProducts();
   updateAuthUI();
 });

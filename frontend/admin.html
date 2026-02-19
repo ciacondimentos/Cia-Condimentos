@@ -527,7 +527,6 @@ async function getProducts() {
         return products.map(p => ({ ...p, price: parseFloat(p.price) || 0 }));
       }
     } catch (e) {
-      console.warn('API error, falling back to localStorage');
     }
   }
   const s = localStorage.getItem(STORAGE_KEYS.products);
@@ -545,9 +544,47 @@ async function saveProducts(products) {
   localStorage.setItem(STORAGE_KEYS.products, JSON.stringify(products));
 }
 
-function getOrders() { const s = localStorage.getItem(STORAGE_KEYS.orders); return s ? JSON.parse(s) : []; }
-function saveOrders(o) { localStorage.setItem(STORAGE_KEYS.orders, JSON.stringify(o)); }
 
+async function getOrders() {
+  try {
+    const response = await fetch('/api/orders');
+    if (!response.ok) throw new Error('Erro ao buscar pedidos do backend');
+    return await response.json();
+  } catch (e) {
+    console.warn('Erro ao buscar pedidos do backend');
+    return [];
+  }
+}
+
+async function saveOrders(orders) {
+  try {
+    await fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(orders)
+    });
+  } catch (e) {
+    console.warn('Erro ao salvar pedidos no backend');
+  }
+}
+
+
+
+async function saveProducts(products) {
+  // Salvar produtos no backend
+  try {
+    await fetch('/api/products', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(products)
+    });
+  } catch (e) {
+    console.warn('Erro ao salvar produtos no backend');
+  }
+}
+
+function getOrders() { /* será ajustado abaixo */ }
+function saveOrders(o) { /* será ajustado abaixo */ }
 function fmt(v) { return 'R$ ' + Number(v).toFixed(2).replace('.', ','); }
 function fmtDate(iso) { const d = new Date(iso); return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}); }
 function catEmoji(c) { return {'Pimentas':'🌶️','Especiarias':'✨','Ervas':'🌿','Temperos':'🧂','Molhos':'🫙'}[c] || '🌶️'; }
@@ -703,18 +740,43 @@ function renderTopProducts(orders, products) {
 }
 
 // ===== CUSTOMERS =====
-function getCustomers() { 
-  const s = localStorage.getItem(STORAGE_KEYS.customers);
+
+// Buscar clientes do backend
+async function getCustomers() {
   try {
-    return s ? JSON.parse(s) : [];
+    const response = await fetch('/api/customers');
+    if (!response.ok) throw new Error('Erro ao buscar clientes do backend');
+    return await response.json();
   } catch (e) {
-    console.warn('Invalid customers data');
+    console.warn('Erro ao buscar clientes do backend');
     return [];
   }
 }
 
-function saveCustomers(customers) { 
-  localStorage.setItem(STORAGE_KEYS.customers, JSON.stringify(customers));
+async function saveCustomers(customers) {
+  // Salvar clientes no backend
+  try {
+    await fetch('/api/customers', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(customers)
+    });
+  } catch (e) {
+    console.warn('Erro ao salvar clientes no backend');
+  }
+}
+
+async function saveCustomers(customers) {
+  // Salvar clientes no backend
+  try {
+    await fetch('/api/customers', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(customers)
+    });
+  } catch (e) {
+    console.warn('Erro ao salvar clientes no backend');
+  }
 }
 
 async function renderCustomersTable() {
