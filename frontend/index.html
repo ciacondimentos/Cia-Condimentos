@@ -498,6 +498,22 @@ async function submitOrder(frete) {
   
   const result = await submitOrderToAPI(orderData);
   if (!result) return;
+
+  // Salvar cliente no admin
+  const existingCustomers = JSON.parse(localStorage.getItem('cia_customers') || '[]');
+  const customerExists = existingCustomers.some(c => c.email === name_client);
+  if (!customerExists) {
+    existingCustomers.push({
+      id: Date.now(),
+      name: name_client,
+      email: name_client,
+      phone: phone,
+      cpf: cpf,
+      address: address,
+      created_at: new Date().toISOString()
+    });
+    localStorage.setItem('cia_customers', JSON.stringify(existingCustomers));
+  }
   
   const orderId = result.id;
   cart = [];

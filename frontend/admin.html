@@ -273,6 +273,10 @@ tr:hover td { background: #faf7f2; }
     <span class="nav-icon">🌶️</span> Produtos
     <span class="sidebar-badge" id="prodCount">0</span>
   </div>
+  <div class="nav-item" onclick="showPage('customers', this)">
+    <span class="nav-icon">👥</span> Clientes
+    <span class="sidebar-badge" id="customersCount">0</span>
+  </div>
   <div class="nav-item" onclick="showPage('orders', this)">
     <span class="nav-icon">📦</span> Pedidos
     <span class="sidebar-badge" id="ordersCount">0</span>
@@ -422,6 +426,36 @@ tr:hover td { background: #faf7f2; }
       </table>
     </div>
 
+    <!-- CUSTOMERS -->
+    <div class="page" id="page-customers">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <h2 style="font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 900; color: var(--marrom);">👥 Clientes</h2>
+      </div>
+      
+      <div class="table-toolbar">
+        <div class="search-box">
+          <input type="text" placeholder="Buscar cliente por nome, email ou CPF..." id="customersSearch" onkeyup="filterCustomersTable()">
+        </div>
+        <button class="btn btn-secondary" onclick="exportCustomers()">📥 Exportar CSV</button>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Email</th>
+            <th>Telefone</th>
+            <th>CPF</th>
+            <th>Pedidos</th>
+            <th>Total Gasto</th>
+            <th>Cadastro</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="customersTableBody"></tbody>
+      </table>
+    </div>
+
     <!-- REPORTS -->
     <div class="page" id="page-reports">
       <div class="dashboard-grid">
@@ -454,7 +488,7 @@ tr:hover td { background: #faf7f2; }
 </main>
 
 <script>
-const STORAGE_KEYS = { products: 'cia_products', orders: 'cia_orders' };
+const STORAGE_KEYS = { products: 'cia_products', orders: 'cia_orders', customers: 'cia_customers' };
 
 // Detectar ambiente e definir URL da API corretamente
 function getApiUrl() {
@@ -525,10 +559,11 @@ function showPage(page, el) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + page).classList.add('active');
   if (el) el.classList.add('active');
-  const titles = { dashboard: 'Dashboard', products: 'Produtos', orders: 'Pedidos', reports: 'Relatórios' };
+  const titles = { dashboard: 'Dashboard', products: 'Produtos', customers: 'Clientes', orders: 'Pedidos', reports: 'Relatórios' };
   document.getElementById('pageTitle').textContent = titles[page] || page;
   if (page === 'dashboard') renderDashboard();
   else if (page === 'products') renderProductsTable().catch(e => console.error(e));
+  else if (page === 'customers') renderCustomersTable().catch(e => console.error(e));
   else if (page === 'orders') renderOrdersTable();
   else if (page === 'reports') renderReports('7');
 }
@@ -543,8 +578,10 @@ async function reloadAll() {
 async function updateSidebarCounts() {
   const products = await getProducts();
   const orders = getOrders();
+  const customers = getCustomers();
   document.getElementById('prodCount').textContent = products.filter(p => p.active).length;
   document.getElementById('ordersCount').textContent = orders.filter(o => o.status === 'Pendente').length;
+  document.getElementById('customersCount').textContent = customers.length;
 }
 
 // ===== DASHBOARD =====
@@ -658,6 +695,155 @@ function renderTopProducts(orders, products) {
       <span style="font-weight:700;color:var(--vermelho)">${p.soldQty} vendidos</span>
     </div>
   `).join('');
+}
+
+// ===== CUSTOMERS =====
+function getCustomers() { 
+  const s = localStorage.getItem(STORAGE_KEYS.customers);
+  try {
+    return s ? JSON.parse(s) : [];
+  } catch (e) {
+    console.warn('Invalid customers data');
+    return [];
+  }
+}
+
+function saveCustomers(customers) { 
+  localStorage.setItem(STORAGE_KEYS.customers, JSON.stringify(customers));
+}
+
+async function renderCustomersTable() {
+  const search = document.getElementById('customersSearch')?.value.toLowerCase() || '';
+  const orders = getOrders();
+  let customers = getCustomers();
+
+  if (search) {
+    customers = customers.filter(c => 
+      c.name.toLowerCase().includes(search) || 
+      c.email.toLowerCase().includes(search) || 
+      (c.cpf || '').includes(search)
+    );
+  }
+
+  const tbody = document.getElementById('customersTableBody');
+  if (customers.length === 0) { 
+    tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><span class="icon">👥</span><p>Nenhum cliente cadastrado</p></div></td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = customers.map(c => {
+    const customerOrders = orders.filter(o => o.customer_email === c.email);
+    const totalSpent = customerOrders.reduce((s, o) => s + (o.total || 0), 0);
+    const regDate = new Date(c.created_at || Date.now());
+    return `
+      <tr>
+        <td><strong>${c.name}</strong></td>
+        <td>${c.email}</td>
+        <td>${c.phone || '---'}</td>
+        <td>${c.cpf || '---'}</td>
+        <td><strong>${customerOrders.length}</strong></td>
+        <td><strong>R$ ${totalSpent.toFixed(2).replace('.', ',')}</strong></td>
+        <td>${regDate.toLocaleDateString('pt-BR')}</td>
+        <td class="actions-cell">
+          <button class="btn btn-sm btn-secondary" onclick="viewCustomerDetails('${c.email}')">📋 Ver</button>
+          <button class="btn btn-sm btn-ghost" onclick="deleteCustomer('${c.email}')">🗑️</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function filterCustomersTable() {
+  renderCustomersTable();
+}
+
+async function viewCustomerDetails(email) {
+  const customers = getCustomers();
+  const customer = customers.find(c => c.email === email);
+  const orders = getOrders().filter(o => o.customer_email === email);
+  
+  if (!customer) return;
+  
+  const detailHTML = `
+    <div class="order-detail-grid">
+      <div class="detail-section">
+        <h4>ℹ️ Informações do Cliente</h4>
+        <div class="detail-row"><strong>Nome:</strong> ${customer.name}</div>
+        <div class="detail-row"><strong>Email:</strong> ${customer.email}</div>
+        <div class="detail-row"><strong>Telefone:</strong> ${customer.phone || '---'}</div>
+        <div class="detail-row"><strong>CPF:</strong> ${customer.cpf || '---'}</div>
+        <div class="detail-row"><strong>Endereço:</strong> ${customer.address || '---'}</div>
+        <div class="detail-row"><strong>Cadastro:</strong> ${new Date(customer.created_at || Date.now()).toLocaleDateString('pt-BR')}</div>
+      </div>
+      <div class="detail-section">
+        <h4>📊 Estatísticas</h4>
+        <div class="detail-row"><strong>Total de Pedidos:</strong> ${orders.length}</div>
+        <div class="detail-row"><strong>Total Gasto:</strong> R$ ${orders.reduce((s, o) => s + (o.total || 0), 0).toFixed(2).replace('.', ',')}</div>
+        <div class="detail-row"><strong>Ticket Médio:</strong> R$ ${(orders.length > 0 ? (orders.reduce((s, o) => s + (o.total || 0), 0) / orders.length) : 0).toFixed(2).replace('.', ',')}</div>
+      </div>
+    </div>
+    ${orders.length > 0 ? `
+      <h4 style="margin-top: 20px;">📦 Histórico de Pedidos</h4>
+      <table class="order-items-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Data</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Ação</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${orders.slice(-5).reverse().map(o => `
+            <tr>
+              <td>${o.id?.slice(0, 8) || '---'}</td>
+              <td>${new Date(o.created_at || Date.now()).toLocaleDateString('pt-BR')}</td>
+              <td>R$ ${(o.total || 0).toFixed(2).replace('.', ',')}</td>
+              <td><span class="status-pill s-${o.status?.toLowerCase()}">${o.status}</span></td>
+              <td><button class="btn btn-sm btn-ghost" onclick="viewOrder('${o.id}')">Ver</button></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    ` : '<p style="color: #aaa; margin-top: 16px;">Sem pedidos registrados</p>'}
+  `;
+
+  document.getElementById('orderModalTitle').textContent = `👥 ${customer.name}`;
+  document.getElementById('orderModalBody').innerHTML = detailHTML;
+  document.getElementById('orderModal').classList.add('open');
+}
+
+function deleteCustomer(email) {
+  confirm('Deletar este cliente?', 'Esta ação não pode ser desfeita.', () => {
+    const customers = getCustomers();
+    const filtered = customers.filter(c => c.email !== email);
+    saveCustomers(filtered);
+    renderCustomersTable();
+    showToast('✅ Cliente removido!');
+  });
+}
+
+function exportCustomers() {
+  const customers = getCustomers();
+  const orders = getOrders();
+  
+  const csv = ['Nome,Email,Telefone,CPF,Pedidos,Total Gasto,Data Cadastro'];
+  customers.forEach(c => {
+    const customerOrders = orders.filter(o => o.customer_email === c.email);
+    const totalSpent = customerOrders.reduce((s, o) => s + (o.total || 0), 0);
+    const regDate = new Date(c.created_at || Date.now()).toLocaleDateString('pt-BR');
+    csv.push(`"${c.name}","${c.email}","${c.phone || ''}","${c.cpf || ''}",${customerOrders.length},"R$ ${totalSpent.toFixed(2)}","${regDate}"`);
+  });
+
+  const blob = new Blob([csv.join('\n')], { type: 'text/csv' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `clientes_${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+  window.URL.revokeObjectURL(url);
+  showToast('✅ Arquivo exportado!');
 }
 
 // ===== PRODUCTS TABLE =====
@@ -896,6 +1082,14 @@ function confirmDelete(id) {
   document.getElementById('confirmAction').onclick = () => { deleteProduct(id); closeConfirm(); };
   document.getElementById('confirmModal').classList.add('open');
 }
+
+function confirm(title, msg, callback) {
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmMsg').textContent = msg;
+  document.getElementById('confirmAction').onclick = () => { callback(); closeConfirm(); };
+  document.getElementById('confirmModal').classList.add('open');
+}
+
 function closeConfirm() { document.getElementById('confirmModal').classList.remove('open'); }
 
 async function deleteProduct(id) {
