@@ -1310,6 +1310,148 @@ function saveOrderStatus() {
   showToast('✅ Pedido atualizado: ' + newStatus + ' / ' + newPayment);
 }
 
+// ===== ORDERS TABLE =====
+async function renderOrdersTable() {
+  const search = document.getElementById('orderSearch').value.toLowerCase();
+  const statusFilter = document.getElementById('orderStatusFilter').value;
+  let orders = await getOrders();
+  
+  if (search) {
+    orders = orders.filter(o => 
+      o.id.toString().includes(search) || 
+      o.customer_name?.toLowerCase().includes(search) || 
+      o.customer_email?.toLowerCase().includes(search)
+    );
+  }
+  
+  if (statusFilter) {
+    orders = orders.filter(o => o.status === statusFilter);
+  }
+
+  const tbody = document.getElementById('ordersTableBody');
+  if (orders.length === 0) { 
+    tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><span class="icon">📦</span><p>Nenhum pedido encontrado</p></div></td></tr>'; 
+    return; 
+  }
+
+  tbody.innerHTML = orders.map(o => `
+    <tr>
+      <td><strong style="font-family:monospace;font-size:12px;color:var(--vermelho)">${o.id}</strong></td>
+      <td>
+        <div style="font-weight:700;font-size:13px">${o.customer_name || '—'}</div>
+        <div style="font-size:11px;color:#aaa">${o.customer_email || ''}</div>
+      </td>
+      <td style="font-size:12px;color:#888">${fmtDate(o.created_at)}</td>
+      <td><strong>${fmt(o.total)}</strong></td>
+      <td><span style="font-size:12px">${o.payment_method || '—'}</span></td>
+      <td><span class="status-pill ps-${(o.payment_status||'aguardando').toLowerCase()}">${o.payment_status || 'Aguardando'}</span></td>
+      <td><span class="status-pill s-${(o.status||'pendente').toLowerCase()}">${o.status || 'Pendente'}</span></td>
+      <td><button class="btn btn-sm btn-secondary" onclick="openOrderModal('${o.id}')">👁 Detalhes</button></td>
+    </tr>
+  `).join('');
+}
+
+// ===== ORDER MODAL =====
+let editingOrderId = null;
+
+async function openOrderModal(id) {
+  editingOrderId = id;
+  const orders = await getOrders();
+  const order = orders.find(o => o.id == id);
+  
+  if (!order) {
+    showToast('❌ Pedido não encontrado');
+    return;
+  }
+
+  document.getElementById('orderModalTitle').textContent = '📦 Pedido ' + id;
+  document.getElementById('orderModalBody').innerHTML = `
+    <div class="order-detail">
+      <div class="order-detail-grid">
+        <div class="detail-section">
+          <h4>👤 Dados do Cliente</h4>
+          <div class="detail-row"><span>Nome</span><strong>${order.customer_name || '—'}</strong></div>
+          <div class="detail-row"><span>E-mail</span><strong>${order.customer_email || '—'}</strong></div>
+          <div class="detail-row"><span>Telefone</span><strong>${order.customer_phone || '—'}</strong></div>
+          <div class="detail-row"><span>CPF</span><strong>${order.customer_cpf || '—'}</strong></div>
+          <div class="detail-row"><span>Endereço</span><strong>${order.customer_address || '—'}</strong></div>
+        </div>
+        <div class="detail-section">
+          <h4>💳 Dados do Pedido</h4>
+          <div class="detail-row"><span>Pedido</span><strong>${order.id}</strong></div>
+          <div class="detail-row"><span>Data</span><strong>${fmtDate(order.created_at)}</strong></div>
+          <div class="detail-row"><span>Pagamento</span><strong>${order.payment_method || '—'}</strong></div>
+          <div class="detail-row"><span>Subtotal</span><strong>${fmt(order.subtotal || 0)}</strong></div>
+          <div class="detail-row"><span>Frete</span><strong>${order.frete === 0 ? 'Grátis' : fmt(order.frete || 0)}</strong></div>
+          <div class="detail-row"><span>Total</span><strong style="color:var(--vermelho)">${fmt(order.total || 0)}</strong></div>
+        </div>
+      </div>
+
+      <h4 style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--vermelho);margin-bottom:10px">🛒 Itens do Pedido</h4>
+      <table class="order-items-table">
+        <thead><tr><th>Produto</th><th>Qtd</th><th>Preço Unit.</th><th>Total</th></tr></thead>
+        <tbody>${
+          (order.items || []).map(item => `
+            <tr>
+              <td><strong>Produto #${item.product_id}</strong></td>
+              <td>${item.quantity}</td>
+              <td>${fmt(item.price)}</td>
+              <td>${fmt(item.price * item.quantity)}</td>
+            </tr>
+          `).join('')
+        }</tbody>
+      </table>
+
+      <div class="control-group">
+        <label>Status do Pedido:</label>
+        <select id="editOrderStatus">
+          ${['Pendente','Processando','Enviado','Entregue','Cancelado'].map(s => `<option value="${s}" ${order.status === s ? 'selected' : ''}>${s}</option>`).join('')}
+        </select>
+        <label style="margin-left:20px">Status do Pagamento:</label>
+        <select id="editPaymentStatus">
+          ${['Aguardando','Pago','Estornado'].map(s => `<option value="${s}" ${order.payment_status === s ? 'selected' : ''}>${s}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+  `;
+  
+  document.getElementById('orderModal').classList.add('open');
+}
+
+function closeOrderModal() { 
+  document.getElementById('orderModal').classList.remove('open'); 
+}
+
+async function saveOrderStatus() {
+  const orders = await getOrders();
+  const idx = orders.findIndex(o => o.id == editingOrderId);
+  if (idx === -1) return;
+
+  const newStatus = document.getElementById('editOrderStatus').value;
+  const newPayment = document.getElementById('editPaymentStatus').value;
+  orders[idx].status = newStatus;
+  orders[idx].payment_status = newPayment;
+  orders[idx].updated_at = new Date().toISOString();
+
+  // Atualizar no backend
+  try {
+    await fetch(`/api/orders/${editingOrderId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: newStatus, payment_status: newPayment })
+    });
+  } catch (e) {
+    console.error('Erro ao atualizar pedido:', e);
+    showToast('❌ Erro ao salvar alterações');
+    return;
+  }
+
+  closeOrderModal();
+  renderOrdersTable().catch(e => console.error(e));
+  renderDashboard().catch(e => console.error(e));
+  showToast('✅ Pedido atualizado: ' + newStatus + ' / ' + newPayment);
+}
+
 // ===== REPORTS =====
 let reportDays = '7';
 

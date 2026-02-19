@@ -613,11 +613,66 @@ async function submitOrder() {
     return;
   }
 
-  cart = [];
-  updateCartBadge();
-  const checkoutBody = safeGetElement('checkoutBody');
-  if (checkoutBody) checkoutBody.innerHTML = '<div style="text-align:center;padding:40px"><span style="font-size:70px">🎉</span><h3 style="color:var(--vermelho);margin-top:20px">Pedido Confirmado!</h3><p>Obrigado pela compra!</p><button class="submit-order-btn" onclick="closeCheckout(); renderProducts();">Voltar às Compras</button></div>';
-  showToast('Pedido realizado com sucesso!');
+  // Preparar dados do pedido
+  const orderData = {
+    customer: {
+      name: name,
+      email: email,
+      phone: '', // Campo opcional por enquanto
+      cpf: '',   // Campo opcional por enquanto
+      address: '' // Campo opcional por enquanto
+    },
+    items: cart.map(item => ({
+      id: item.id,
+      qty: item.qty,
+      price: item.price
+    })),
+    subtotal: getCartTotal(),
+    frete: 0, // Frete grátis por enquanto
+    total: getCartTotal(),
+    payment: 'PIX' // Método de pagamento padrão
+  };
+
+  try {
+    console.log('📦 Enviando pedido para API:', orderData);
+    const response = await fetch(`${API_URL}/orders`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(orderData)
+    });
+
+    if (response.ok) {
+      const result = await response.json();
+      console.log('✅ Pedido criado com sucesso:', result);
+      
+      // Limpar carrinho
+      cart = [];
+      updateCartBadge();
+      
+      // Mostrar confirmação
+      const checkoutBody = safeGetElement('checkoutBody');
+      if (checkoutBody) {
+        checkoutBody.innerHTML = `
+          <div style="text-align:center;padding:40px">
+            <span style="font-size:70px">🎉</span>
+            <h3 style="color:var(--vermelho);margin-top:20px">Pedido Confirmado!</h3>
+            <p>Seu pedido #${result.id} foi realizado com sucesso!</p>
+            <p style="font-size:14px;color:#666;margin:10px 0">Você receberá um e-mail de confirmação em breve.</p>
+            <button class="submit-order-btn" onclick="closeCheckout(); renderProducts();">Voltar às Compras</button>
+          </div>
+        `;
+      }
+      
+      showToast('✅ Pedido realizado com sucesso!');
+    } else {
+      const error = await response.json();
+      console.error('❌ Erro ao criar pedido:', error);
+      showToast('❌ Erro ao processar pedido: ' + (error.error || 'Erro desconhecido'));
+    }
+  } catch (error) {
+    console.error('❌ Erro na requisição:', error);
+    showToast('❌ Erro de conexão. Tente novamente.');
+  }
 }
 
 function openAuth() {
