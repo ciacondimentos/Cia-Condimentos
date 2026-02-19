@@ -801,9 +801,41 @@ function showAuthTab(tab) {
   }
 }
 
-function doLogin() {
-  showToast('Login realizado!');
-  closeAuth();
+async function doLogin() {
+  const emailEl = document.getElementById('aEmail');
+  const passwordEl = document.getElementById('aPassword');
+  
+  const email = emailEl ? emailEl.value.trim() : '';
+  const password = passwordEl ? passwordEl.value.trim() : '';
+  
+  if (!email || !password) {
+    showToast('Preencha email e senha!');
+    return;
+  }
+  
+  try {
+    const response = await fetch(`${API_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    
+    const data = await response.json();
+    
+    if (response.ok) {
+      // Login bem-sucedido
+      localStorage.setItem('authToken', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      showToast('✅ Login realizado com sucesso!');
+      closeAuth();
+    } else {
+      // Credenciais inválidas
+      showToast('❌ ' + (data.error || 'Email ou senha incorretos'));
+    }
+  } catch (e) {
+    console.error('Erro no login:', e);
+    showToast('❌ Erro ao conectar com o servidor');
+  }
 }
 
 function protegerPrefixoTelefone(e) {
