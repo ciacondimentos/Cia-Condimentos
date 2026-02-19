@@ -408,6 +408,7 @@ tr:hover td { background: #faf7f2; }
           <option value="Entregue">Entregue</option>
           <option value="Cancelado">Cancelado</option>
         </select>
+        <button class="btn btn-secondary" onclick="exportOrders()">📥 Exportar CSV</button>
       </div>
       <table>
         <thead>
@@ -458,6 +459,10 @@ tr:hover td { background: #faf7f2; }
 
     <!-- REPORTS -->
     <div class="page" id="page-reports">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <h2 style="font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 900; color: var(--marrom);">📈 Relatórios</h2>
+        <button class="btn btn-secondary" onclick="exportReports()">📥 Exportar CSV</button>
+      </div>
       <div class="dashboard-grid">
         <div class="card" style="grid-column:1/-1">
           <div class="card-header">
@@ -844,6 +849,107 @@ function exportCustomers() {
   a.click();
   window.URL.revokeObjectURL(url);
   showToast('✅ Arquivo exportado!');
+}
+
+function exportOrders() {
+  const orders = getOrders();
+  const customers = getCustomers();
+  
+  const csv = ['ID Pedido,Cliente,Email,Telefone,Data,Subtotal,Frete,Total,Forma de Pagamento,Status Pedido,Status Pagamento'];
+  orders.forEach(o => {
+    const customer = customers.find(c => c.email === o.customer_email);
+    const date = new Date(o.created_at || Date.now()).toLocaleDateString('pt-BR');
+    const subtotal = (o.subtotal || 0).toFixed(2);
+    const frete = (o.frete || 0).toFixed(2);
+    const total = (o.total || 0).toFixed(2);
+    csv.push(`"${o.id?.slice(0, 16) || 'N/A'}","${o.customer_name}","${o.customer_email}","${o.customer_phone || ''}","${date}","R$ ${subtotal}","R$ ${frete}","R$ ${total}","${o.payment_method || '---'}","${o.status || '---'}","${o.payment_status || '---'}"`);
+  });
+
+  const blob = new Blob([csv.join('\n')], { type: 'text/csv' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `pedidos_${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+  window.URL.revokeObjectURL(url);
+  showToast('✅ Pedidos exportados!');
+}
+
+function exportReports() {
+  const orders = getOrders();
+  const products = getProducts();
+  
+  const today = new Date();
+  const last7Days = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const recentOrders = orders.filter(o => new Date(o.created_at || Date.now()) >= last7Days);
+  
+  const csv = [];
+  csv.push('===== RELATÓRIO DE VENDAS =====');
+  csv.push(`Data de Geração: ${today.toLocaleDateString('pt-BR')}`);
+  csv.push('');
+  
+  csv.push('--- RESUMO GERAL (Últimos 7 dias) ---');
+  const totalRevenue = recentOrders.reduce((s, o) => s + (o.total || 0), 0);
+  const totalOrders = recentOrders.length;
+  const avgOrder = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+  csv.push(`Total de Pedidos,${totalOrders}`);
+  csv.push(`Receita Total,"R$ ${totalRevenue.toFixed(2)}"`);
+  csv.push(`Ticket Médio,"R$ ${avgOrder.toFixed(2)}"`);
+  csv.push('');
+  
+  csv.push('--- VENDAS POR CATEGORIA ---');
+  const categoryStats = {};
+  recentOrders.forEach(o => {
+    (o.items || []).forEach(item => {
+      const product = products.find(p => p.id === item.id);
+      if (product) {
+        if (!categoryStats[product.category]) categoryStats[product.category] = { qty: 0, revenue: 0 };
+        categoryStats[product.category].qty += item.qty;
+        categoryStats[product.category].revenue += item.price * item.qty;
+      }
+    });
+  });
+  csv.push('Categoria,Quantidade,Receita');
+  Object.entries(categoryStats).forEach(([cat, stats]) => {
+    csv.push(`"${cat}",${stats.qty},"R$ ${stats.revenue.toFixed(2)}"`);
+  });
+  csv.push('');
+  
+  csv.push('--- FORMAS DE PAGAMENTO ---');
+  const paymentStats = {};
+  recentOrders.forEach(o => {
+    const method = o.payment_method || 'Não informado';
+    if (!paymentStats[method]) paymentStats[method] = 0;
+    paymentStats[method]++;
+  });
+  csv.push('Forma de Pagamento,Quantidade');
+  Object.entries(paymentStats).forEach(([method, count]) => {
+    csv.push(`"${method}",${count}`);
+  });
+  csv.push('');
+  
+  csv.push('--- TOPO 5 PRODUTOS MAIS VENDIDOS ---');
+  const productSales = {};
+  recentOrders.forEach(o => {
+    (o.items || []).forEach(item => {
+      if (!productSales[item.id]) productSales[item.id] = { name: item.name || 'N/A', qty: 0 };
+      productSales[item.id].qty += item.qty;
+    });
+  });
+  const topProducts = Object.entries(productSales).sort((a, b) => b[1].qty - a[1].qty).slice(0, 5);
+  csv.push('Produto,Quantidade Vendida');
+  topProducts.forEach(([id, data]) => {
+    csv.push(`"${data.name}",${data.qty}`);
+  });
+
+  const blob = new Blob([csv.join('\n')], { type: 'text/csv' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `relatorio_vendas_${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+  window.URL.revokeObjectURL(url);
+  showToast('✅ Relatório exportado!');
 }
 
 // ===== PRODUCTS TABLE =====
