@@ -59,6 +59,7 @@
   .product-category { font-size: 11px; font-weight: 700; color: var(--amarelo-escuro); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; }
   .product-name { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: var(--marrom); margin-bottom: 8px; line-height: 1.3; }
   .product-desc { font-size: 13px; color: #888; line-height: 1.5; margin-bottom: 16px; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .product-stock { font-size: 12px; color: var(--vermelho); font-weight: 700; margin-bottom: 16px; }
   .product-footer { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #f0e8d0; padding-top: 16px; }
   .product-price { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 900; color: var(--vermelho); }
   .add-cart-btn { background: var(--vermelho); color: white; border: none; padding: 10px 20px; border-radius: 4px; font-weight: 700; font-size: 13px; cursor: pointer; transition: all 0.2s; letter-spacing: 1px; }
@@ -66,9 +67,9 @@
   .add-cart-btn:disabled { background: #ccc; cursor: not-allowed; }
 
   .cart-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 200; display: none; }
-  .cart-overlay.open { display: block !important; }
+  .cart-overlay.open { display: block; }
   .cart-sidebar { position: fixed; top: 0; right: 0; width: 440px; height: 100vh; background: white; z-index: 201; display: flex; flex-direction: column; transform: translateX(500px); transition: transform 0.3s ease-in-out; box-shadow: -8px 0 40px rgba(0,0,0,0.2); }
-  .cart-sidebar.open { transform: translateX(0) !important; }
+  .cart-sidebar.open { transform: translateX(0); }
   .cart-header { background: var(--vermelho); color: white; padding: 24px; display: flex; justify-content: space-between; align-items: center; }
   .cart-header h3 { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; }
   .cart-close { background: none; border: none; color: white; font-size: 24px; cursor: pointer; }
@@ -91,7 +92,7 @@
   .empty-cart .icon { font-size: 60px; margin-bottom: 16px; }
 
   .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 300; display: none; align-items: center; justify-content: center; }
-  .modal-overlay.open { display: flex !important; }
+  .modal-overlay.open { display: flex; }
   .modal { background: white; border-radius: 12px; max-width: 560px; width: 100%; overflow: hidden; }
   .modal-header { background: var(--vermelho); padding: 24px 28px; color: white; display: flex; justify-content: space-between; align-items: center; }
   .modal-header h3 { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; }
@@ -106,8 +107,6 @@
   .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--marrom); color: white; padding: 14px 28px; border-radius: 8px; font-weight: 700; z-index: 500; transition: transform 0.3s; }
   .toast.show { transform: translateX(-50%) translateY(0); }
 
-  .auth-btn { background: transparent; color: white; border: 2px solid rgba(255,255,255,0.12); padding: 8px 14px; border-radius: 6px; font-weight: 700; cursor: pointer; margin-left: 12px; }
-
   footer { background: var(--marrom); color: rgba(255,255,255,0.6); text-align: center; padding: 32px; font-size: 13px; }
   footer .brand { font-family: 'Playfair Display', serif; color: var(--amarelo); font-size: 20px; font-weight: 700; margin-bottom: 8px; }
   .no-products { text-align: center; padding: 80px 20px; color: #aaa; }
@@ -116,11 +115,12 @@
 <body>
 
 <div id="toast" class="toast"></div>
-<div class="cart-overlay" id="cartOverlay" onclick="if(event.target === this) toggleCart()"></div>
+
+<div class="cart-overlay" id="cartOverlay"></div>
 <div class="cart-sidebar" id="cartSidebar">
   <div class="cart-header">
     <h3>🛒 Seu Carrinho</h3>
-    <button class="cart-close" onclick="toggleCart()">✕</button>
+    <button class="cart-close" onclick="closeCart()">✕</button>
   </div>
   <div class="cart-items" id="cartItems"></div>
   <div class="cart-footer">
@@ -129,29 +129,13 @@
   </div>
 </div>
 
-<div class="modal-overlay" id="checkoutModal" onclick="if(event.target === this) closeCheckout()">
+<div class="modal-overlay" id="checkoutModal">
   <div class="modal" onclick="event.stopPropagation();">
     <div class="modal-header">
       <h3>🌶️ Finalizar Pedido</h3>
       <button style="background:none;border:none;color:white;font-size:24px;cursor:pointer" onclick="closeCheckout()">✕</button>
     </div>
     <div class="modal-body" id="checkoutBody"></div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="authModal" onclick="if(event.target === this) closeAuth()">
-  <div class="modal" onclick="event.stopPropagation();">
-    <div class="modal-header">
-      <h3>🔐 Entrar / Cadastrar</h3>
-      <button style="background:none;border:none;color:white;font-size:24px;cursor:pointer" onclick="closeAuth()">✕</button>
-    </div>
-    <div class="modal-body">
-      <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #e0d8c8; padding-bottom: 10px;">
-        <button id="tabLogin" style="flex: 1; background: transparent; border: none; padding: 10px; font-weight: 700; cursor: pointer; border-bottom: 3px solid var(--vermelho); color: var(--vermelho);" onclick="showAuthTab('login')">🔓 Entrar</button>
-        <button id="tabRegister" style="flex: 1; background: transparent; border: none; padding: 10px; font-weight: 700; cursor: pointer; border-bottom: 3px solid transparent; color: #aaa;" onclick="showAuthTab('register')">➕ Cadastrar</button>
-      </div>
-      <div id="authContent"></div>
-    </div>
   </div>
 </div>
 
@@ -171,8 +155,7 @@
       <a href="#contato">Contato</a>
     </nav>
     <div style="display:flex;align-items:center;">
-      <button class="cart-btn" onclick="toggleCart()">🛒 Carrinho <span class="cart-badge" id="cartBadge">0</span></button>
-      <button class="auth-btn" onclick="openAuth()">Entrar / Cadastrar</button>
+      <button class="cart-btn" onclick="openCart()">🛒 Carrinho <span class="cart-badge" id="cartBadge">0</span></button>
     </div>
   </div>
 </header>
@@ -207,915 +190,304 @@
 </footer>
 
 <script>
-function getApiUrl() {
-  const hostname = window.location.hostname;
-  if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    return 'http://localhost:3000/api';
-  }
-  return 'https://cia-condimentos.onrender.com/api';
-}
+const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  ? 'http://localhost:3000/api'
+  : 'https://cia-condimentos.onrender.com/api';
 
-function safeGetElement(id) {
-  return document.getElementById(id);
-}
-
-const API_URL = getApiUrl();
 let cart = [];
 let currentFilter = 'all';
 let currentSearch = '';
 
-// Garantir que os modais sempre existem no DOM
-function ensureModalsExist() {
-  const cartSidebar = document.getElementById('cartSidebar');
-  const authModal = document.getElementById('authModal');
-  const checkoutModal = document.getElementById('checkoutModal');
-  const cartOverlay = document.getElementById('cartOverlay');
-  
-  let missingElements = [];
-  if (!cartSidebar) missingElements.push('cartSidebar');
-  if (!authModal) missingElements.push('authModal');
-  if (!checkoutModal) missingElements.push('checkoutModal');
-  if (!cartOverlay) missingElements.push('cartOverlay');
-  
-  if (missingElements.length > 0) {
-    console.error('❌ CRÍTICO: Os seguintes elementos desapareceram:', missingElements.join(', '));
-    console.error('  Recriando modais...');
-    
-    // Recriar os modais no início do body
-    const modalsHTML = `
-<div id="toast" class="toast"></div>
-<div class="cart-overlay" id="cartOverlay" onclick="if(event.target === this) toggleCart()"></div>
-<div class="cart-sidebar" id="cartSidebar">
-  <div class="cart-header">
-    <h3>🛒 Seu Carrinho</h3>
-    <button class="cart-close" onclick="toggleCart()">✕</button>
-  </div>
-  <div class="cart-items" id="cartItems"></div>
-  <div class="cart-footer">
-    <div class="cart-total"><span>Total</span><span id="cartTotal">R$ 0,00</span></div>
-    <button class="checkout-btn" onclick="openCheckout()">Finalizar Compra</button>
-  </div>
-</div>
+/* ── Inicialização ── */
+document.addEventListener('DOMContentLoaded', () => {
+  var overlay = document.getElementById('cartOverlay');
+  if (overlay) overlay.addEventListener('click', closeCart);
 
-<div class="modal-overlay" id="checkoutModal" onclick="if(event.target === this) closeCheckout()">
-  <div class="modal" onclick="event.stopPropagation();">
-    <div class="modal-header">
-      <h3>🌶️ Finalizar Pedido</h3>
-      <button style="background:none;border:none;color:white;font-size:24px;cursor:pointer" onclick="closeCheckout()">✕</button>
-    </div>
-    <div class="modal-body" id="checkoutBody"></div>
-  </div>
-</div>
+  var checkoutModal = document.getElementById('checkoutModal');
+  if (checkoutModal) checkoutModal.addEventListener('click', function(e) {
+    if (e.target === this) closeCheckout();
+  });
 
-<div class="modal-overlay" id="authModal" onclick="if(event.target === this) closeAuth()">
-  <div class="modal" onclick="event.stopPropagation();">
-    <div class="modal-header">
-      <h3>🔐 Entrar / Cadastrar</h3>
-      <button style="background:none;border:none;color:white;font-size:24px;cursor:pointer" onclick="closeAuth()">✕</button>
-    </div>
-    <div class="modal-body">
-      <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #e0d8c8; padding-bottom: 10px;">
-        <button id="tabLogin" style="flex: 1; background: transparent; border: none; padding: 10px; font-weight: 700; cursor: pointer; border-bottom: 3px solid var(--vermelho); color: var(--vermelho);" onclick="showAuthTab('login')">🔓 Entrar</button>
-        <button id="tabRegister" style="flex: 1; background: transparent; border: none; padding: 10px; font-weight: 700; cursor: pointer; border-bottom: 3px solid transparent; color: #aaa;" onclick="showAuthTab('register')">➕ Cadastrar</button>
+  renderProducts();
+});
+
+/* ── Carrinho ── */
+function getCartElements() {
+  var sidebar = document.getElementById('cartSidebar');
+  var overlay = document.getElementById('cartOverlay');
+  // Se a extensão do navegador removeu os elementos, recria
+  if (!sidebar) {
+    sidebar = document.createElement('div');
+    sidebar.id = 'cartSidebar';
+    sidebar.className = 'cart-sidebar';
+    sidebar.innerHTML = '<div class="cart-header"><h3>🛒 Seu Carrinho</h3><button class="cart-close" onclick="closeCart()">✕</button></div><div class="cart-items" id="cartItems"></div><div class="cart-footer"><div class="cart-total"><span>Total</span><span id="cartTotal">R$ 0,00</span></div><button class="checkout-btn" onclick="openCheckout()">Finalizar Compra</button></div>';
+    document.body.insertBefore(sidebar, document.body.firstChild);
+  }
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'cartOverlay';
+    overlay.className = 'cart-overlay';
+    overlay.addEventListener('click', closeCart);
+    document.body.insertBefore(overlay, document.body.firstChild);
+  }
+  return { sidebar: sidebar, overlay: overlay };
+}
+
+function toggleCart() {
+  var els = getCartElements();
+  els.sidebar.classList.toggle('open');
+  els.overlay.classList.toggle('open');
+  // Re-renderiza itens ao abrir
+  if (els.sidebar.classList.contains('open')) renderCartItems();
+}
+
+function openCart() {
+  var els = getCartElements();
+  els.sidebar.classList.add('open');
+  els.overlay.classList.add('open');
+  renderCartItems();
+}
+
+function closeCart() {
+  var els = getCartElements();
+  els.sidebar.classList.remove('open');
+  els.overlay.classList.remove('open');
+}
+
+function addToCart(productId) {
+  const existing = cart.find(i => i.id === productId);
+  existing ? existing.qty++ : cart.push({ id: productId, qty: 1 });
+  updateCartBadge();
+  renderCartItems();
+  showToast('✅ Produto adicionado ao carrinho!');
+}
+
+function updateCartBadge() {
+  const badge = document.getElementById('cartBadge');
+  if (badge) badge.textContent = cart.reduce((s, i) => s + i.qty, 0);
+}
+
+function changeQty(productId, delta) {
+  const item = cart.find(i => i.id === productId);
+  if (!item) return;
+  item.qty += delta;
+  if (item.qty <= 0) cart = cart.filter(i => i.id !== productId);
+  updateCartBadge();
+  renderCartItems();
+}
+
+function removeFromCart(productId) {
+  cart = cart.filter(i => i.id !== productId);
+  updateCartBadge();
+  renderCartItems();
+}
+
+function renderCartItems() {
+  const container = document.getElementById('cartItems');
+  const totalEl = document.getElementById('cartTotal');
+  if (!container) return;
+
+  if (cart.length === 0) {
+    container.innerHTML = '<div class="empty-cart"><div class="icon">🛒</div><p>Seu carrinho está vazio</p></div>';
+    if (totalEl) totalEl.textContent = 'R$ 0,00';
+    return;
+  }
+
+  getProducts().then(products => {
+    let total = 0;
+    container.innerHTML = cart.map(item => {
+      const p = products.find(x => x.id === item.id);
+      if (!p) return '';
+      const subtotal = p.price * item.qty;
+      total += subtotal;
+      const imgHtml = p.image
+        ? `<img src="${p.image}" alt="${p.name}" onerror="this.parentElement.innerHTML='🌶️'">`
+        : '🌶️';
+      return `
+        <div class="cart-item">
+          <div class="cart-item-img">${imgHtml}</div>
+          <div class="cart-item-info">
+            <div class="cart-item-name">${p.name}</div>
+            <div class="cart-item-price">R$ ${subtotal.toFixed(2).replace('.', ',')}</div>
+            <div class="qty-controls">
+              <button class="qty-btn" onclick="changeQty(${p.id}, -1)">−</button>
+              <span class="qty-val">${item.qty}</span>
+              <button class="qty-btn" onclick="changeQty(${p.id}, 1)">+</button>
+              <button class="remove-btn" onclick="removeFromCart(${p.id})">🗑</button>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+    if (totalEl) totalEl.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+  });
+}
+
+/* ── Checkout ── */
+function openCheckout() {
+  if (cart.length === 0) { showToast('⚠️ Seu carrinho está vazio!'); return; }
+  const modal = document.getElementById('checkoutModal');
+  const body  = document.getElementById('checkoutBody');
+  if (!modal || !body) return;
+
+  getProducts().then(products => {
+    let total = 0;
+    const itemsHtml = cart.map(item => {
+      const p = products.find(x => x.id === item.id);
+      if (!p) return '';
+      const subtotal = p.price * item.qty;
+      total += subtotal;
+      return `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0e8d0;">
+        <span>${p.name} x${item.qty}</span>
+        <span>R$ ${subtotal.toFixed(2).replace('.', ',')}</span>
+      </div>`;
+    }).join('');
+
+    body.innerHTML = `
+      <div style="margin-bottom:20px;">${itemsHtml}</div>
+      <div style="font-size:20px;font-weight:900;display:flex;justify-content:space-between;margin-bottom:20px;">
+        <span>Total</span><span style="color:var(--vermelho)">R$ ${total.toFixed(2).replace('.', ',')}</span>
       </div>
-      <div id="authContent"></div>
-    </div>
-  </div>
-</div>
+      <div class="form-group"><label>Nome Completo *</label><input type="text" id="checkoutName" placeholder="Seu nome"></div>
+      <div class="form-group"><label>Telefone *</label><input type="text" id="checkoutPhone" placeholder="(81) 9 XXXX-XXXX" oninput="maskPhone(this)"></div>
+      <div class="form-group"><label>Endereço de Entrega *</label><input type="text" id="checkoutAddress" placeholder="Rua, número, bairro, cidade"></div>
+      <div class="form-group"><label>Observações</label><input type="text" id="checkoutObs" placeholder="Instruções especiais..."></div>
+      <button class="submit-order-btn" onclick="submitOrder()">✅ Confirmar Pedido via WhatsApp</button>
     `;
-    
-    // Inserir modais no início do body
-    document.body.insertAdjacentHTML('afterbegin', modalsHTML);
-    console.log('✓ Modais recriados com sucesso');
-    
-    // Re-adicionar event listeners
-    setupModalListeners();
-  }
+
+    // Fecha o carrinho e abre o modal
+    document.getElementById('cartSidebar').classList.remove('open');
+    document.getElementById('cartOverlay').classList.remove('open');
+    modal.classList.add('open');
+  });
 }
 
-function setupModalListeners() {
-  const cartOverlay = document.getElementById('cartOverlay');
-  const checkoutModal = document.getElementById('checkoutModal');
-  const authModal = document.getElementById('authModal');
-  const cartBtn = document.querySelector('.cart-btn');
-  const authBtn = document.querySelector('.auth-btn');
-  
-  if (cartBtn) {
-    cartBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      toggleCart();
-    });
-  }
-  
-  if (authBtn) {
-    authBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      openAuth();
-    });
-  }
-  
-  if (cartOverlay) {
-    cartOverlay.addEventListener('click', (e) => {
-      if (e.target === cartOverlay) toggleCart();
-    });
-  }
-  
-  if (checkoutModal) {
-    checkoutModal.addEventListener('click', (e) => {
-      if (e.target === checkoutModal) closeCheckout();
-    });
-  }
-  
-  if (authModal) {
-    authModal.addEventListener('click', (e) => {
-      if (e.target === authModal) closeAuth();
-    });
-  }
+function closeCheckout() {
+  document.getElementById('checkoutModal').classList.remove('open');
 }
 
+async function submitOrder() {
+  const name    = document.getElementById('checkoutName')?.value?.trim();
+  const phone   = document.getElementById('checkoutPhone')?.value?.trim();
+  const address = document.getElementById('checkoutAddress')?.value?.trim();
+  const obs     = document.getElementById('checkoutObs')?.value?.trim();
+
+  if (!name || !phone || !address) { showToast('⚠️ Preencha todos os campos obrigatórios!'); return; }
+
+  const products = await getProducts();
+  let total = 0;
+  const lines = cart.map(item => {
+    const p = products.find(x => x.id === item.id);
+    if (!p) return '';
+    const subtotal = p.price * item.qty;
+    total += subtotal;
+    return `• ${p.name} x${item.qty} = R$ ${subtotal.toFixed(2).replace('.', ',')}`;
+  }).filter(Boolean).join('\n');
+
+  const msg = `🌶️ *NOVO PEDIDO - Cia de Condimentos*\n\n👤 *Cliente:* ${name}\n📱 *Telefone:* ${phone}\n📍 *Endereço:* ${address}\n${obs ? `📝 *Obs:* ${obs}\n` : ''}\n*Itens:*\n${lines}\n\n💰 *Total: R$ ${total.toFixed(2).replace('.', ',')}*`;
+
+  window.open(`https://wa.me/5581999999999?text=${encodeURIComponent(msg)}`, '_blank');
+  cart = [];
+  updateCartBadge();
+  closeCheckout();
+  showToast('✅ Pedido enviado via WhatsApp!');
+}
+
+/* ── Produtos ── */
 async function getProducts() {
   try {
-    console.log('🔄 Buscando produtos de:', API_URL);
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 10000);
-    
     const response = await fetch(`${API_URL}/products`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
       signal: controller.signal
     });
-    
     clearTimeout(timeout);
-    console.log('✓ Resposta da API:', response.status);
     if (response.ok) {
       const products = await response.json();
-      console.log('✓ Produtos carregados:', products.length);
       return products.map(p => ({ ...p, price: parseFloat(p.price) || 0 }));
-    } else {
-      console.error('✗ Erro na resposta da API:', response.status, response.statusText);
     }
   } catch (e) {
-    console.error('✗ Erro ao buscar produtos:', e.message);
     if (e.name === 'AbortError') {
-      console.error('✗ Requisição expirou (timeout)');
       showToast('Servidor demorando. Tentando novamente...');
     } else {
       showToast('Erro ao conectar com o servidor');
     }
   }
-  console.warn('⚠️ Usando produto de demonstração');
   return [{ id: 1, name: 'Produto Demo', category: 'Demo', price: 19.90, stock: 10, active: true, image: null, description: 'Produto de demonstração' }];
 }
 
 async function renderProducts() {
-  console.log('📦 renderProducts iniciado');
   const products = await getProducts();
   let filtered = products.filter(p =>
-    p.active &&
-    (currentFilter === 'all' || p.category === currentFilter)
+    p.active && (currentFilter === 'all' || p.category === currentFilter)
   );
-
   if (currentSearch) {
     filtered = filtered.filter(p =>
       p.name.toLowerCase().includes(currentSearch) ||
-      p.description.toLowerCase().includes(currentSearch)
+      (p.description || '').toLowerCase().includes(currentSearch)
     );
   }
 
-  const container = safeGetElement('productsGrid');
-  if (!container) {
-    console.error('Elemento productsGrid não encontrado');
-    return;
-  }
+  const grid = document.getElementById('productsGrid');
+  if (!grid) return;
 
   if (filtered.length === 0) {
-    container.innerHTML = '<div class="no-products"><span class="icon">🌶️</span><p>Nenhum produto disponível</p></div>';
+    grid.innerHTML = '<div class="no-products">Nenhum produto encontrado.</div>';
     return;
   }
 
-  container.innerHTML = filtered.map(p => `
-    <div class="product-card">
-      <div class="product-img">
-        ${p.image ? `<img src="${p.image}" alt="${p.name}">` : '🌶️'}
-      </div>
-      <div class="product-body">
-        <div class="product-category">${p.category}</div>
-        <div class="product-name">${p.name}</div>
-        <div class="product-desc">${p.description}</div>
-        <div class="product-footer">
-          <div class="product-price">${fmt(p.price)}</div>
-          <button class="add-cart-btn" onclick="addToCart(${p.id})" ${p.stock <= 0 ? 'disabled' : ''}>
-            ${p.stock > 0 ? '🛒 Adicionar' : '❌ Indisponível'}
-          </button>
+  grid.innerHTML = filtered.map(p => {
+    const imgHtml = p.image
+      ? `<img src="${p.image}" alt="${p.name}" onerror="this.parentElement.innerHTML='🌶️'">`
+      : '🌶️';
+    return `
+      <div class="product-card">
+        <div class="product-img">${imgHtml}</div>
+        <div class="product-body">
+          <div class="product-category">${p.category || ''}</div>
+          <div class="product-name">${p.name}</div>
+          <div class="product-desc">${p.description || ''}</div>
+          <div class="product-stock">Estoque: ${p.stock} unidades</div>
+          <div class="product-footer">
+            <div class="product-price">R$ ${p.price.toFixed(2).replace('.', ',')}</div>
+            <button class="add-cart-btn" onclick="addToCart(${p.id})" ${p.stock === 0 ? 'disabled' : ''}>
+              ${p.stock === 0 ? 'Esgotado' : 'Adicionar'}
+            </button>
+          </div>
         </div>
-      </div>
-    </div>
-  `).join('');
-  
-  console.log('✓ renderProducts completado');
-  ensureModalsExist(); // Verificar se modais ainda existem após renderizar
+      </div>`;
+  }).join('');
 }
 
-function filterProducts(category, button) {
+function filterProducts(category, btn) {
   currentFilter = category;
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  if (button) button.classList.add('active');
+  btn.classList.add('active');
   renderProducts();
 }
 
-function handleSearch(query) {
-  currentSearch = query.toLowerCase();
+function handleSearch(val) {
+  currentSearch = val.toLowerCase();
   renderProducts();
 }
 
-function toggleCart() {
-  ensureModalsExist(); // Verificar se os modais existem
-  console.log('🛒 toggleCart chamado');
-  const sidebar = safeGetElement('cartSidebar');
-  const overlay = safeGetElement('cartOverlay');
-  console.log('✓ cartSidebar encontrado:', !!sidebar, 'cartOverlay encontrado:', !!overlay);
-  
-  if (sidebar) {
-    sidebar.classList.toggle('open');
-    console.log('✓ Toggle "open" aplicado ao cartSidebar');
-    
-    // Forçar estilos via JavaScript
-    if (sidebar.classList.contains('open')) {
-      sidebar.style.transform = 'translateX(0)';
-      sidebar.style.display = 'flex';
-      sidebar.style.zIndex = '201';
-      console.log('✓ Estilos forçados: transform=translateX(0), display=flex, z-index=201');
-    } else {
-      sidebar.style.transform = 'translateX(500px)';
-      console.log('✓ Estilos forçados: transform=translateX(500px) (fechar)');
-    }
-  } else {
-    console.error('✗ Elemento cartSidebar não encontrado');
-  }
-  
-  if (overlay) {
-    overlay.classList.toggle('open');
-    if (overlay.classList.contains('open')) {
-      overlay.style.display = 'flex';
-      overlay.style.zIndex = '200';
-      console.log('✓ Overlay visível');
-    } else {
-      overlay.style.display = 'none';
-      console.log('✓ Overlay oculto');
-    }
-  }
-  
-  renderCart();
+/* ── Máscara ── */
+function maskPhone(input) {
+  let v = input.value.replace(/\D/g, '').slice(0, 11);
+  if (v.length <= 2) input.value = v.length ? `(${v}` : v;
+  else if (v.length <= 7) input.value = `(${v.slice(0,2)}) ${v.slice(2)}`;
+  else input.value = `(${v.slice(0,2)}) ${v.slice(2,7)}-${v.slice(7)}`;
 }
 
-function updateCartBadge() {
-  const badge = safeGetElement('cartBadge');
-  if (badge) badge.textContent = cart.reduce((s, i) => s + i.qty, 0);
-}
-
-function getCartTotal() {
-  return cart.reduce((s, i) => s + i.price * i.qty, 0);
-}
-
-function fmt(v) {
-  return 'R$ ' + Number(v).toFixed(2).replace('.', ',');
-}
-
-async function addToCart(id) {
-  const products = await getProducts();
-  const product = products.find(p => p.id === id);
-  if (!product || product.stock <= 0) return;
-
-  const existing = cart.find(i => i.id === id);
-  if (existing) {
-    if (existing.qty >= product.stock) {
-      showToast('Quantidade máxima em estoque');
-      return;
-    }
-    existing.qty++;
-  } else {
-    cart.push({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      qty: 1,
-      image: product.image
-    });
-  }
-
-  updateCartBadge();
-  renderCart();
-  showToast('Produto adicionado!');
-}
-
-function changeQty(id, delta) {
-  const item = cart.find(i => i.id === id);
-  if (!item) return;
-  item.qty = Math.max(1, item.qty + delta);
-  updateCartBadge();
-  renderCart();
-}
-
-function removeFromCart(id) {
-  cart = cart.filter(i => i.id !== id);
-  updateCartBadge();
-  renderCart();
-}
-
-function renderCart() {
-  const container = safeGetElement('cartItems');
-  const totalEl = safeGetElement('cartTotal');
-  
-  if (!container || !totalEl) return;
-  totalEl.textContent = fmt(getCartTotal());
-
-  if (cart.length === 0) {
-    container.innerHTML = '<div class="empty-cart"><span class="icon">🛒</span><p>Seu carrinho está vazio</p></div>';
-    return;
-  }
-
-  container.innerHTML = cart.map(item => `
-    <div class="cart-item">
-      <div class="cart-item-img">
-        ${item.image ? `<img src="${item.image}">` : '🌶️'}
-      </div>
-      <div class="cart-item-info">
-        <div class="cart-item-name">${item.name}</div>
-        <div class="cart-item-price">${fmt(item.price * item.qty)}</div>
-        <div class="qty-controls">
-          <button class="qty-btn" onclick="changeQty(${item.id},-1)">−</button>
-          <span class="qty-val">${item.qty}</span>
-          <button class="qty-btn" onclick="changeQty(${item.id},1)">+</button>
-          <button class="remove-btn" onclick="removeFromCart(${item.id})">🗑️</button>
-        </div>
-      </div>
-    </div>
-  `).join('');
-}
-
-function openCheckout() {
-  ensureModalsExist();
-  console.log('💳 openCheckout chamado, carrinho tem', cart.length, 'itens');
-  if (cart.length === 0) {
-    showToast('Adicione produtos ao carrinho!');
-    return;
-  }
-  
-  // Buscar dados do usuário logado
-  const userData = JSON.parse(localStorage.getItem('user') || '{}');
-  
-  const checkoutBody = safeGetElement('checkoutBody');
-  console.log('✓ checkoutBody encontrado:', !!checkoutBody);
-  if (checkoutBody) {
-    checkoutBody.innerHTML = `
-      <h3>Resumo do Pedido</h3>
-      <div style="background: #f5f5f5; padding: 12px; border-radius: 4px; margin-bottom: 20px;">
-        ${cart.map(item => `<div style="display: flex; justify-content: space-between; margin-bottom: 8px;"><span>${item.name} (x${item.qty})</span><strong>${fmt(item.price * item.qty)}</strong></div>`).join('')}
-        <div style="border-top: 2px solid #ddd; padding-top: 8px; margin-top: 8px; font-size: 18px; font-weight: bold; display: flex; justify-content: space-between;"><span>Total:</span><span style="color: var(--vermelho);">${fmt(getCartTotal())}</span></div>
-      </div>
-      <div class="form-group">
-        <label>Nome Completo *</label>
-        <input type="text" id="cName" value="${userData.name || ''}" readonly required>
-      </div>
-      <div class="form-group">
-        <label>E-mail *</label>
-        <input type="email" id="cEmail" value="${userData.email || ''}" readonly required>
-      </div>
-      <div class="form-group">
-        <label>Telefone *</label>
-        <input type="text" id="cPhone" value="" readonly required>
-      </div>
-      <div class="form-group">
-        <label>CPF</label>
-        <input type="text" id="cCPF" value="" readonly>
-      </div>
-      <div class="form-group">
-        <label>Endereço Completo *</label>
-        <textarea id="cAddress" placeholder="Rua, número, bairro, cidade - CEP" rows="3" required></textarea>
-      </div>
-      <div class="form-group">
-        <label>Forma de Pagamento</label>
-        <select id="cPayment">
-          <option value="PIX">PIX</option>
-          <option value="Cartão de Crédito">Cartão de Crédito</option>
-          <option value="Cartão de Débito">Cartão de Débito</option>
-          <option value="Boleto">Boleto</option>
-        </select>
-      </div>
-      <button class="submit-order-btn" onclick="submitOrder()">✓ Confirmar Pedido</button>
-    `;
-  }
-  const modal = safeGetElement('checkoutModal');
-  if (modal) {
-    modal.classList.add('open');
-    modal.style.display = 'flex';
-    modal.style.zIndex = '300';
-    modal.style.alignItems = 'center';
-    modal.style.justifyContent = 'center';
-    console.log('✓ checkoutModal aberto e estilos forçados');
-    
-    // Adicionar formatadores e preencher dados após um pequeno delay para garantir que os elementos existem
-    setTimeout(() => {
-      const phoneInput = document.getElementById('cPhone');
-      const cpfInput = document.getElementById('cCPF');
-      
-      // Preencher telefone e CPF com dados do usuário (se disponíveis)
-      if (phoneInput && userData.phone) {
-        phoneInput.value = userData.phone;
-      } else if (phoneInput) {
-        phoneInput.value = '(81) 9';
-        phoneInput.addEventListener('input', formatarTelefone);
-        phoneInput.addEventListener('keydown', protegerPrefixoTelefone);
-      }
-      
-      if (cpfInput && userData.cpf) {
-        cpfInput.value = userData.cpf;
-      } else if (cpfInput) {
-        cpfInput.addEventListener('input', formatarCPF);
-      }
-    }, 0);
-  }
-}
-
-function closeCheckout() {
-  const modal = safeGetElement('checkoutModal');
-  if (modal) {
-    modal.classList.remove('open');
-    modal.style.display = 'none';
-    console.log('✓ checkoutModal fechado');
-  }
-}
-
-async function submitOrder() {
-  const addressEl = safeGetElement('cAddress');
-  const paymentEl = safeGetElement('cPayment');
-  
-  // Buscar dados do usuário logado
-  const userData = JSON.parse(localStorage.getItem('user') || '{}');
-  
-  const address = addressEl ? addressEl.value.trim() : '';
-  const payment = paymentEl ? paymentEl.value : 'PIX';
-
-  if (!address) {
-    showToast('Preencha o endereço de entrega!');
-    return;
-  }
-
-  // Usar dados do usuário logado
-  const customer = {
-    name: userData.name,
-    email: userData.email,
-    phone: userData.phone,
-    cpf: userData.cpf,
-    address: address
-  };
-
-  // Calcular valores
-  const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
-  const frete = subtotal > 50 ? 0 : 10; // Frete grátis acima de R$ 50
-  const total = subtotal + frete;
-
-  try {
-    const response = await fetch(`${API_URL}/orders`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        customer: customer,
-        items: cart.map(i => ({ id: i.id, qty: i.qty, price: i.price })),
-        subtotal,
-        frete,
-        total,
-        payment
-      })
-    });
-
-    if (response.ok) {
-      const order = await response.json();
-      cart = [];
-      updateCartBadge();
-      const checkoutBody = safeGetElement('checkoutBody');
-      if (checkoutBody) checkoutBody.innerHTML = '<div style="text-align:center;padding:40px"><span style="font-size:70px">🎉</span><h3 style="color:var(--vermelho);margin-top:20px">Pedido Confirmado!</h3><p>Pedido #' + order.id + ' realizado com sucesso!</p><button class="submit-order-btn" onclick="closeCheckout(); renderProducts();">Voltar às Compras</button></div>';
-      showToast('Pedido realizado com sucesso!');
-    } else {
-      const error = await response.json();
-      showToast('Erro: ' + (error.error || 'Falha ao enviar pedido'));
-    }
-  } catch (e) {
-    console.error('Erro ao enviar pedido:', e);
-    showToast('Erro ao conectar com o servidor');
-  }
-}
-
-function openAuth() {
-  ensureModalsExist();
-  console.log('🔓 openAuth chamado');
-  const authModal = safeGetElement('authModal');
-  console.log('✓ authModal encontrado:', !!authModal);
-  if (authModal) {
-    authModal.classList.add('open');
-    // Forçar estilos
-    authModal.style.display = 'flex';
-    authModal.style.zIndex = '300';
-    authModal.style.alignItems = 'center';
-    authModal.style.justifyContent = 'center';
-    console.log('✓ Classe "open" adicionada ao authModal, estilos forçados');
-    showAuthTab('login');
-  } else {
-    console.error('✗ Elemento authModal não foi encontrado no DOM');
-  }
-}
-
-function closeAuth() {
-  const authModal = safeGetElement('authModal');
-  if (authModal) {
-    authModal.classList.remove('open');
-    authModal.style.display = 'none';
-    console.log('✓ authModal fechado');
-  }
-}
-
-function showAuthTab(tab) {
-  console.log('📋 showAuthTab chamado com tab:', tab);
-  const container = safeGetElement('authContent');
-  const tabLogin = safeGetElement('tabLogin');
-  const tabRegister = safeGetElement('tabRegister');
-  
-  console.log('✓ authContent:', !!container, 'tabLogin:', !!tabLogin, 'tabRegister:', !!tabRegister);
-  if (!container || !tabLogin || !tabRegister) {
-    console.error('✗ Um ou mais elementos de abas não foram encontrados');
-    return;
-  }
-
-  if (tab === 'login') {
-    tabLogin.style.color = 'var(--vermelho)';
-    tabLogin.style.borderBottomColor = 'var(--vermelho)';
-    tabRegister.style.color = '#aaa';
-    tabRegister.style.borderBottomColor = 'transparent';
-    
-    container.innerHTML = `
-      <div class="form-group">
-        <label>E-mail</label>
-        <input type="email" id="aEmail" placeholder="seu@exemplo.com">
-      </div>
-      <div class="form-group">
-        <label>Senha</label>
-        <input type="password" id="aPassword" placeholder="••••••••">
-      </div>
-      <button class="submit-order-btn" onclick="doLogin()">🔓 Entrar</button>
-    `;
-  } else {
-    tabLogin.style.color = '#aaa';
-    tabLogin.style.borderBottomColor = 'transparent';
-    tabRegister.style.color = 'var(--vermelho)';
-    tabRegister.style.borderBottomColor = 'var(--amarelo)';
-    
-    container.innerHTML = `
-      <div class="form-group">
-        <label>Nome Completo</label>
-        <input type="text" id="rName" placeholder="Seu nome completo">
-      </div>
-      <div class="form-group">
-        <label>CPF <small style="color:#c0392b">(exatamente 11 dígitos)</small></label>
-        <input type="text" id="rCPF" placeholder="00000000000" maxlength="14">
-      </div>
-      <div class="form-group">
-        <label>Telefone <small style="color:#c0392b">(81) 9 + 8 dígitos)</small></label>
-        <input type="tel" id="rPhone" placeholder="(81) 9XXXX-XXXX" maxlength="15">
-      </div>
-      <div class="form-group">
-        <label>E-mail</label>
-        <input type="email" id="rEmail" placeholder="seu@exemplo.com">
-      </div>
-      <div class="form-group">
-        <label>Senha</label>
-        <input type="password" id="rPassword" placeholder="••••••••">
-      </div>
-      <button class="submit-order-btn" onclick="doRegister()">✅ Cadastrar</button>
-    `;
-    
-    // Adicionar event listeners após renderizar os inputs
-    setTimeout(() => {
-      const phoneInput = document.getElementById('rPhone');
-      const cpfInput = document.getElementById('rCPF');
-      
-      if (phoneInput) {
-        // Inicializar com (81) 9
-        phoneInput.value = '(81) 9';
-        phoneInput.addEventListener('input', formatarTelefone);
-        phoneInput.addEventListener('keydown', protegerPrefixoTelefone);
-      }
-      
-      if (cpfInput) {
-        cpfInput.addEventListener('input', formatarCPF);
-      }
-    }, 0);
-  }
-}
-
-async function doLogin() {
-  const emailEl = document.getElementById('aEmail');
-  const passwordEl = document.getElementById('aPassword');
-  
-  const email = emailEl ? emailEl.value.trim() : '';
-  const password = passwordEl ? passwordEl.value.trim() : '';
-  
-  if (!email || !password) {
-    showToast('Preencha email e senha!');
-    return;
-  }
-  
-  try {
-    const response = await fetch(`${API_URL}/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
-    });
-    
-    const data = await response.json();
-    
-    if (response.ok) {
-      // Login bem-sucedido
-      localStorage.setItem('authToken', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      showToast('✅ Login realizado com sucesso!');
-      updateAuthUI(data.user.name);
-      closeAuth();
-    } else {
-      // Credenciais inválidas
-      showToast('❌ ' + (data.error || 'Email ou senha incorretos'));
-    }
-  } catch (e) {
-    console.error('Erro no login:', e);
-    showToast('❌ Erro ao conectar com o servidor');
-  }
-}
-
-function updateAuthUI(userName) {
-  const authBtn = document.querySelector('.auth-btn');
-  if (authBtn) {
-    authBtn.outerHTML = `<span style="color: white; margin-left: 12px; font-weight: 700;">Bem vindo ${userName}</span> <button class="auth-btn" onclick="logout()" style="margin-left: 8px;">Sair</button>`;
-  }
-}
-
-function logout() {
-  localStorage.removeItem('authToken');
-  localStorage.removeItem('user');
-  showToast('✅ Logout realizado!');
-  // Recarregar a página para voltar ao estado inicial
-  location.reload();
-}
-
-function protegerPrefixoTelefone(e) {
-  const input = e.target;
-  // Se tentar apagar dentro dos primeiros 6 caracteres: (81) 9
-  // Posições críticas: ( [ ]  8 [ ]  1 [ ]  ) [ ]  9
-  // Apenas apagar é permitido nas posições após o 9
-  if (e.key === 'Backspace' || e.key === 'Delete') {
-    const cursorPos = input.selectionStart;
-    // Impedir apagar antes da posição 6 (após o "9" de "(81) 9")
-    if (cursorPos <= 6) {
-      e.preventDefault();
-      return false;
-    }
-  }
-}
-
-function formatarTelefone(e) {
-  let valor = e.target.value.replace(/\D/g, '');
-  
-  // Forçar o prefixo (81)9 no início
-  if (!valor.startsWith('819')) {
-    if (valor.length === 0) {
-      valor = '819';
-    } else if (valor.length === 1) {
-      valor = '819' + valor.substring(0, 0);
-    } else if (valor.length === 2) {
-      valor = '819' + valor.substring(0, 0);
-    } else if (valor.length >= 3) {
-      // Se o usuário digitou errado, corrigir para 819
-      const resto = valor.substring(3);
-      valor = '819' + resto.substring(0, 8);
-    }
-  }
-  
-  // Limitar a 11 dígitos (81 9 + 8 dígitos)
-  valor = valor.substring(0, 11);
-  
-  // Formatar como (81) 9XXXX-XXXX
-  let formatado = '';
-  if (valor.length > 0) {
-    formatado = '(' + valor.substring(0, 2);
-    if (valor.length > 2) {
-      formatado += ') ' + valor.substring(2, 7);
-      if (valor.length > 7) {
-        formatado += '-' + valor.substring(7);
-      }
-    } else {
-      formatado += ')';
-    }
-  }
-  
-  e.target.value = formatado;
-}
-
-function formatarCPF(e) {
-  let valor = e.target.value.replace(/\D/g, '');
-  
-  // Limitar a 11 dígitos
-  valor = valor.substring(0, 11);
-  
-  // Formatar como XXX.XXX.XXX-XX
-  let formatado = '';
-  if (valor.length > 0) {
-    formatado = valor.substring(0, 3);
-    if (valor.length > 3) {
-      formatado += '.' + valor.substring(3, 6);
-      if (valor.length > 6) {
-        formatado += '.' + valor.substring(6, 9);
-        if (valor.length > 9) {
-          formatado += '-' + valor.substring(9);
-        }
-      }
-    }
-  }
-  
-  e.target.value = formatado;
-}
-
-function validarTelefone(telefone) {
-  // Remover formatação
-  const apenas_numeros = telefone.replace(/\D/g, '');
-  
-  // Deve ter exatamente 11 dígitos
-  if (apenas_numeros.length !== 11) {
-    return false;
-  }
-  
-  // Deve começar com 819
-  if (!apenas_numeros.startsWith('819')) {
-    return false;
-  }
-  
-  return true;
-}
-
-function validarCPF(cpf) {
-  // Remover formatação
-  const apenas_numeros = cpf.replace(/\D/g, '');
-  
-  // Deve ter exatamente 11 dígitos
-  if (apenas_numeros.length !== 11) {
-    return false;
-  }
-  
-  return true;
-}
-
-function doRegister() {
-  const nameEl = document.getElementById('rName');
-  const cpfEl = document.getElementById('rCPF');
-  const phoneEl = document.getElementById('rPhone');
-  const emailEl = document.getElementById('rEmail');
-  const passwordEl = document.getElementById('rPassword');
-  
-  const name = nameEl ? nameEl.value.trim() : '';
-  const cpf = cpfEl ? cpfEl.value.trim() : '';
-  const phone = phoneEl ? phoneEl.value.trim() : '';
-  const email = emailEl ? emailEl.value.trim() : '';
-  const password = passwordEl ? passwordEl.value.trim() : '';
-  
-  // Validar campos obrigatórios
-  if (!name) {
-    showToast('⚠️ Preencha o nome completo!');
-    return;
-  }
-  
-  if (!cpf) {
-    showToast('⚠️ Preencha o CPF!');
-    return;
-  }
-  
-  if (!validarCPF(cpf)) {
-    showToast('⚠️ CPF deve conter exatamente 11 dígitos!');
-    return;
-  }
-  
-  if (!phone) {
-    showToast('⚠️ Preencha o telefone!');
-    return;
-  }
-  
-  if (!validarTelefone(phone)) {
-    showToast('⚠️ Telefone deve ser (81) 9 + 8 dígitos!');
-    return;
-  }
-  
-  if (!email) {
-    showToast('⚠️ Preencha o e-mail!');
-    return;
-  }
-  
-  if (!password) {
-    showToast('⚠️ Preencha a senha!');
-    return;
-  }
-  
-  // Enviar dados para a API
-  const cpfNumeros = cpf.replace(/\D/g, '');
-  const phoneNumeros = phone.replace(/\D/g, '');
-  
-  fetch(`${API_URL}/auth/register`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      name,
-      cpf: cpfNumeros,
-      phone: phoneNumeros,
-      email,
-      password
-    })
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (data.error) {
-      showToast('❌ ' + data.error);
-    } else {
-      showToast('✅ Cadastro realizado com sucesso!');
-      // Armazenar token se necessário
-      if (data.token) {
-        localStorage.setItem('authToken', data.token);
-      }
-      closeAuth();
-    }
-  })
-  .catch(err => {
-    console.error('Erro no cadastro:', err);
-    showToast('❌ Erro ao realizar cadastro');
-  });
-}
-
+/* ── Toast ── */
 function showToast(msg) {
-  const t = safeGetElement('toast');
+  const t = document.getElementById('toast');
   if (!t) return;
   t.textContent = msg;
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3000);
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-  console.log('✓ DOM carregado - inicializando aplicação');
-  console.log('✓ API URL:', API_URL);
-  // Verificar se elementos críticos existem
-  const criticalElements = ['authModal', 'cartSidebar', 'checkoutModal', 'productsGrid'];
-  criticalElements.forEach(id => {
-    const el = document.getElementById(id);
-    console.log(`  ${el ? '✓' : '✗'} ${id}: ${el ? 'encontrado' : 'NÃO ENCONTRADO'}`);
-  });
-  
-  // Monitorar mudanças no DOM
-  const observer = new MutationObserver((mutations) => {
-    // Verificar se algum elemento crítico foi removido
-    const cartSidebar = document.getElementById('cartSidebar');
-    const authModal = document.getElementById('authModal');
-    const checkoutModal = document.getElementById('checkoutModal');
-    
-    if (!cartSidebar || !authModal || !checkoutModal) {
-      console.error('❌ ALERTA: Um ou mais modais foram removidos do DOM!');
-      ensureModalsExist();
-    }
-  });
-  
-  // Observar mudanças na body
-  observer.observe(document.body, {
-    childList: true,
-    subtree: true,
-    attributes: false
-  });
-  
-  // WATCHDOG: Verificar a cada 2 segundos se os modais existem
-  setInterval(() => {
-    ensureModalsExist();
-  }, 2000);
-  
-  // Adicionar event listeners
-  setupModalListeners();
-  
-  // Verificar se usuário já está logado
-  const user = localStorage.getItem('user');
-  if (user) {
-    try {
-      const userData = JSON.parse(user);
-      updateAuthUI(userData.name);
-    } catch (e) {
-      console.error('Erro ao parsear dados do usuário:', e);
-      localStorage.removeItem('user');
-    }
-  }
-  
-  renderProducts();
-});
 </script>
 </body>
 </html>
