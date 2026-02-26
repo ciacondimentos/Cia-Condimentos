@@ -714,7 +714,7 @@ function filterCustomersTable() {
   renderCustomersTableAsync();
 }
 
-function openAddCustomer() {
+function openAddCustomer(customer = null) {
   const modal = document.getElementById('customerModal');
   if (!modal) {
     console.error('customerModal não encontrado');
@@ -722,54 +722,55 @@ function openAddCustomer() {
   }
   
   const title = document.getElementById('customerModalTitle') || document.createElement('div');
-  title.textContent = 'Adicionar Novo Cliente';
+  title.textContent = customer ? 'Editar Cliente' : 'Adicionar Novo Cliente';
   
   const body = document.getElementById('customerModalBody') || document.createElement('div');
   body.innerHTML = `
+    <input type="hidden" id="custId" value="${customer ? customer.id : ''}">
     <div class="form-row-2">
       <div class="fg">
         <label>Nome *</label>
-        <input type="text" id="custName" placeholder="Nome completo">
+        <input type="text" id="custName" placeholder="Nome completo" value="${customer ? customer.name || '' : ''}">
       </div>
       <div class="fg">
         <label>Email</label>
-        <input type="email" id="custEmail" placeholder="email@example.com">
+        <input type="email" id="custEmail" placeholder="email@example.com" value="${customer ? customer.email || '' : ''}">
       </div>
     </div>
     <div class="form-row-2">
       <div class="fg">
         <label>Telefone</label>
-        <input type="tel" id="custPhone" placeholder="(11) 99999-9999">
+        <input type="tel" id="custPhone" placeholder="(11) 99999-9999" value="${customer ? customer.phone || '' : ''}">
       </div>
       <div class="fg">
         <label>CPF</label>
-        <input type="text" id="custCPF" placeholder="000.000.000-00">
+        <input type="text" id="custCPF" placeholder="000.000.000-00" value="${customer ? customer.cpf || '' : ''}">
       </div>
     </div>
     <div class="form-row-2">
       <div class="fg">
         <label>Endereço</label>
-        <input type="text" id="custAddress" placeholder="Rua, número">
+        <input type="text" id="custAddress" placeholder="Rua, número" value="${customer ? customer.address || '' : ''}">
       </div>
       <div class="fg">
         <label>Cidade</label>
-        <input type="text" id="custCity" placeholder="São Paulo">
+        <input type="text" id="custCity" placeholder="São Paulo" value="${customer ? customer.city || '' : ''}">
       </div>
     </div>
     <div class="form-row-2">
       <div class="fg">
         <label>Estado</label>
-        <input type="text" id="custState" placeholder="SP" maxlength="2">
+        <input type="text" id="custState" placeholder="SP" maxlength="2" value="${customer ? customer.state || '' : ''}">
       </div>
       <div class="fg">
         <label>CEP</label>
-        <input type="text" id="custZip" placeholder="00000-000">
+        <input type="text" id="custZip" placeholder="00000-000" value="${customer ? customer.zip || '' : ''}">
       </div>
     </div>
     <div class="form-row-2">
       <div class="fg" style="grid-column: 1 / -1;">
         <label>Notas/Observações</label>
-        <textarea id="custNotes" placeholder="Anotações sobre o cliente" style="min-height: 80px; resize: vertical;"></textarea>
+        <textarea id="custNotes" placeholder="Anotações sobre o cliente" style="min-height: 80px; resize: vertical;">${customer ? customer.notes || '' : ''}</textarea>
       </div>
     </div>
   `;
@@ -784,6 +785,7 @@ function closeCustomerModal() {
 
 function saveCustomer() {
   const name = document.getElementById('custName')?.value?.trim();
+  const id = document.getElementById('custId')?.value?.trim();
   
   if (!name) {
     showToast('Nome é obrigatório', 'error');
@@ -802,9 +804,12 @@ function saveCustomer() {
     notes: document.getElementById('custNotes')?.value || ''
   };
   
-  // POST para criar cliente
-  fetch(`${API_BASE}/auth/admin/customers`, {
-    method: 'POST',
+  const method = id ? 'PUT' : 'POST';
+  const url = id ? `${API_BASE}/auth/admin/customers/${id}` : `${API_BASE}/auth/admin/customers`;
+  const successMessage = id ? 'Cliente atualizado com sucesso!' : 'Cliente cadastrado com sucesso!';
+  
+  fetch(url, {
+    method: method,
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(customerData)
   })
@@ -813,7 +818,7 @@ function saveCustomer() {
     if (data.error) {
       showToast(data.error, 'error');
     } else {
-      showToast('Cliente cadastrado com sucesso!');
+      showToast(successMessage);
       closeCustomerModal();
       renderCustomersTableAsync();
     }
@@ -825,8 +830,19 @@ function saveCustomer() {
 }
 
 function editCustomer(id) {
-  showToast(`Editar cliente ${id}`);
-  openAddCustomer();
+  fetch(`${API_BASE}/auth/admin/customers/${id}`)
+    .then(res => res.json())
+    .then(customer => {
+      if (customer.error) {
+        showToast(customer.error, 'error');
+      } else {
+        openAddCustomer(customer);
+      }
+    })
+    .catch(error => {
+      console.error('Error fetching customer:', error);
+      showToast('Erro ao carregar dados do cliente', 'error');
+    });
 }
 
 function deleteCustomer(id) {

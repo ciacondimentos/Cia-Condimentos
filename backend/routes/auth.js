@@ -163,6 +163,27 @@ router.post('/admin/customers', async (req, res) => {
   }
 });
 
+// ADMIN - Buscar cliente por ID
+router.get('/admin/customers/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await db.query(
+      'SELECT id, name, email, phone, cpf, address, city, state, zip, notes, created_at FROM users WHERE id=$1',
+      [id]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Cliente não encontrado' });
+    }
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Error fetching customer:', error);
+    res.status(500).json({ error: 'Falha ao buscar cliente' });
+  }
+});
+
 // ADMIN - Atualizar cliente
 router.put('/admin/customers/:id', async (req, res) => {
   try {
