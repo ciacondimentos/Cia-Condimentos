@@ -351,13 +351,35 @@ function openCheckout() {
       <div class="form-group"><label>Telefone *</label><input type="text" id="checkoutPhone" placeholder="(81) 9 XXXX-XXXX" oninput="maskPhone(this)"></div>
       <div class="form-group"><label>Endereço de Entrega *</label><input type="text" id="checkoutAddress" placeholder="Rua, número, bairro, cidade"></div>
       <div class="form-group"><label>Observações</label><input type="text" id="checkoutObs" placeholder="Instruções especiais..."></div>
-      <button class="submit-order-btn" onclick="submitOrder()">✅ Confirmar Pedido via WhatsApp</button>
+      <button id="submitOrderBtn" class="submit-order-btn">✅ Confirmar Pedido via WhatsApp</button>
     `;
 
     // Fecha o carrinho e abre o modal
     document.getElementById('cartSidebar').classList.remove('open');
     document.getElementById('cartOverlay').classList.remove('open');
     modal.classList.add('open');
+
+    // Attach debug handler to the submit button (replaces previous handler to avoid duplicates)
+    const submitBtn = document.getElementById('submitOrderBtn');
+    if (submitBtn) {
+      submitBtn.onclick = function (e) {
+        try {
+          console.log('DEBUG: submitOrderBtn clicked', {
+            cartLength: Array.isArray(cart) ? cart.length : 0,
+            cart: JSON.parse(JSON.stringify(cart || [])),
+            formValues: {
+              name: document.getElementById('checkoutName')?.value,
+              phone: document.getElementById('checkoutPhone')?.value,
+              address: document.getElementById('checkoutAddress')?.value
+            }
+          });
+        } catch (err) {
+          console.log('DEBUG: error serializing cart for log', err);
+        }
+        // chamar a função principal de envio
+        submitOrder();
+      };
+    }
   });
 }
 
