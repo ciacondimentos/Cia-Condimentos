@@ -371,25 +371,83 @@ async function submitOrder() {
   const address = document.getElementById('checkoutAddress')?.value?.trim();
   const obs     = document.getElementById('checkoutObs')?.value?.trim();
 
-  if (!name || !phone || !address) { showToast('⚠️ Preencha todos os campos obrigatórios!'); return; }
+  if (!name || !phone || !address) { 
+    showToast('⚠️ Preencha todos os campos obrigatórios!'); 
+    return; 
+  }
 
-  const products = await getProducts();
-  let total = 0;
-  const lines = cart.map(item => {
-    const p = products.find(x => x.id === item.id);
-    if (!p) return '';
-    const subtotal = p.price * item.qty;
-    total += subtotal;
-    return `• ${p.name} x${item.qty} = R$ ${subtotal.toFixed(2).replace('.', ',')}`;
-  }).filter(Boolean).join('\n');
+  try {
+    const products = await getProducts();
+    let total = 0;
+    const orderItems = cart.map(item => {
+      const p = products.find(x => x.id === item.id);
+      if (!p) return null;
+      const subtotal = p.price * item.qty;
+      total += subtotal;
+      return {
+        id: item.id,
+        qty: item.qty,
+        price: p.price,
+        name: p.name
+      };
+    }).filter(Boolean);
 
-  const msg = `🌶️ *NOVO PEDIDO - Cia de Condimentos*\n\n👤 *Cliente:* ${name}\n📱 *Telefone:* ${phone}\n📍 *Endereço:* ${address}\n${obs ? `📝 *Obs:* ${obs}\n` : ''}\n*Itens:*\n${lines}\n\n💰 *Total: R$ ${total.toFixed(2).replace('.', ',')}*`;
+    if (orderItems.length === 0) {
+      showToast('❌ Erro: Nenhum produto válido no carrinho');
+      return;
+    }
 
-  window.open(`https://wa.me/5581999999999?text=${encodeURIComponent(msg)}`, '_blank');
-  cart = [];
-  updateCartBadge();
-  closeCheckout();
-  showToast('✅ Pedido enviado via WhatsApp!');
+    // Salvar pedido no backend
+    const orderData = {
+      customer: {
+        name: name,
+        email: '', // Opcional por enquanto
+        phone: phone,
+        cpf: '', // Opcional por enquanto
+        address: address
+      },
+      items: orderItems,
+      subtotal: total,
+      frete: 0, // Frete grátis ou calcular
+      total: total,
+      payment: 'WhatsApp',
+      status: 'Pendente',
+      paymentStatus: 'Aguardando'
+    };
+
+    const response = await fetch(`${API_URL}/orders`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(orderData)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Erro ao salvar pedido');
+    }
+
+    const orderResult = await response.json();
+
+    // Gerar mensagem do WhatsApp
+    const lines = orderItems.map(item => 
+      `• ${item.name} x${item.qty} = R$ ${(item.price * item.qty).toFixed(2).replace('.', ',')}`
+    ).join('\n');
+
+    const msg = `🌶️ *NOVO PEDIDO - Cia de Condimentos*\n\n👤 *Cliente:* ${name}\n📱 *Telefone:* ${phone}\n📍 *Endereço:* ${address}\n${obs ? `📝 *Obs:* ${obs}\n` : ''}\n*Itens:*\n${lines}\n\n💰 *Total: R$ ${total.toFixed(2).replace('.', ',')}*\n\n*Pedido #${orderResult.id}*`;
+
+    // Abrir WhatsApp
+    window.open(`https://wa.me/5581999999999?text=${encodeURIComponent(msg)}`, '_blank');
+    
+    // Limpar carrinho e fechar modal
+    cart = [];
+    updateCartBadge();
+    closeCheckout();
+    showToast('✅ Pedido enviado via WhatsApp!');
+
+  } catch (error) {
+    console.error('Error submitting order:', error);
+    showToast(`❌ Erro ao enviar pedido: ${error.message}`);
+  }
 }
 
 /* ── Produtos ── */
