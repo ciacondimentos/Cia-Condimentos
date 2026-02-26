@@ -66,6 +66,7 @@
   .add-cart-btn:hover { background: var(--vermelho-escuro); transform: scale(1.05); }
   .add-cart-btn:disabled { background: #ccc; cursor: not-allowed; }
 
+  /* Carrinho Sidebar — z-index 200/201 */
   .cart-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 200; display: none; }
   .cart-overlay.open { display: block; }
   .cart-sidebar { position: fixed; top: 0; right: 0; width: 440px; height: 100vh; background: white; z-index: 201; display: flex; flex-direction: column; transform: translateX(500px); transition: transform 0.3s ease-in-out; box-shadow: -8px 0 40px rgba(0,0,0,0.2); }
@@ -75,36 +76,45 @@
   .cart-close { background: none; border: none; color: white; font-size: 24px; cursor: pointer; }
   .cart-items { flex: 1; overflow-y: auto; padding: 20px; }
   .cart-item { display: flex; gap: 16px; padding: 16px 0; border-bottom: 1px solid #f0e8d0; }
-  .cart-item-img { width: 70px; height: 70px; background: #f0e8d0; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 28px; }
-  .cart-item-img img { width: 100%; height: 100%; object-fit: cover; }
+  .cart-item-img { width: 70px; height: 70px; background: #f0e8d0; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 28px; flex-shrink: 0; }
+  .cart-item-img img { width: 100%; height: 100%; object-fit: cover; border-radius: 4px; }
   .cart-item-info { flex: 1; }
   .cart-item-name { font-weight: 700; font-size: 15px; color: var(--marrom); }
   .cart-item-price { color: var(--vermelho); font-weight: 700; font-size: 16px; margin-top: 4px; }
   .qty-controls { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
-  .qty-btn { background: var(--amarelo); border: none; width: 28px; height: 28px; border-radius: 50%; font-weight: 900; cursor: pointer; }
+  .qty-btn { background: var(--amarelo); border: none; width: 28px; height: 28px; border-radius: 50%; font-weight: 900; cursor: pointer; font-size: 16px; line-height: 1; }
   .qty-val { font-weight: 700; font-size: 16px; min-width: 24px; text-align: center; }
   .remove-btn { background: none; border: none; color: #ccc; cursor: pointer; font-size: 18px; }
-  .cart-footer { padding: 20px; border-top: 2px solid #f0e8d0; }
+  .cart-footer { padding: 20px; border-top: 2px solid #f0e8d0; background: white; }
   .cart-total { display: flex; justify-content: space-between; font-size: 20px; font-weight: 900; margin-bottom: 16px; }
   .cart-total span:last-child { color: var(--vermelho); }
-  .checkout-btn { width: 100%; background: var(--vermelho); color: white; border: none; padding: 16px; font-weight: 900; cursor: pointer; border-radius: 4px; }
+  .checkout-btn { width: 100%; background: var(--vermelho); color: white; border: none; padding: 16px; font-weight: 900; cursor: pointer; border-radius: 4px; font-size: 16px; letter-spacing: 1px; transition: background 0.2s; }
+  .checkout-btn:hover { background: var(--vermelho-escuro); }
   .empty-cart { text-align: center; padding: 60px 20px; color: #aaa; }
   .empty-cart .icon { font-size: 60px; margin-bottom: 16px; }
 
-  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 300; display: none; align-items: center; justify-content: center; }
+  /* Modal de Checkout — z-index 400, ACIMA do sidebar (201) */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 400; display: none; align-items: center; justify-content: center; padding: 20px; }
   .modal-overlay.open { display: flex; }
-  .modal { background: white; border-radius: 12px; max-width: 560px; width: 100%; overflow: hidden; }
-  .modal-header { background: var(--vermelho); padding: 24px 28px; color: white; display: flex; justify-content: space-between; align-items: center; }
+  .modal { background: white; border-radius: 12px; max-width: 560px; width: 100%; overflow: hidden; max-height: 90vh; display: flex; flex-direction: column; }
+  .modal-header { background: var(--vermelho); padding: 24px 28px; color: white; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
   .modal-header h3 { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; }
-  .modal-body { padding: 28px; max-height: 80vh; overflow-y: auto; }
+  .modal-body { padding: 28px; overflow-y: auto; flex: 1; }
   .form-group { margin-bottom: 16px; }
-  .form-group label { display: block; font-size: 12px; font-weight: 700; color: var(--marrom); margin-bottom: 6px; }
-  .form-group input { width: 100%; padding: 10px 14px; border: 2px solid #e0d8c8; border-radius: 4px; font-size: 14px; }
+  .form-group label { display: block; font-size: 12px; font-weight: 700; color: var(--marrom); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; }
+  .form-group input { width: 100%; padding: 10px 14px; border: 2px solid #e0d8c8; border-radius: 4px; font-size: 14px; font-family: inherit; transition: border-color 0.2s; }
   .form-group input:focus { border-color: var(--amarelo); outline: none; }
-  .submit-order-btn { width: 100%; background: var(--vermelho); color: white; border: none; padding: 16px; font-weight: 900; cursor: pointer; border-radius: 4px; margin-top: 16px; }
+  .order-summary { background: #fdf8ee; border-radius: 8px; padding: 16px; margin-bottom: 20px; }
+  .order-summary-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0e8d0; font-size: 14px; }
+  .order-summary-item:last-child { border-bottom: none; }
+  .order-total-row { display: flex; justify-content: space-between; font-size: 20px; font-weight: 900; padding: 16px 0 0; }
+  .order-total-row span:last-child { color: var(--vermelho); }
+  .submit-order-btn { width: 100%; background: var(--vermelho); color: white; border: none; padding: 16px; font-weight: 900; cursor: pointer; border-radius: 4px; margin-top: 16px; font-size: 16px; letter-spacing: 1px; transition: background 0.2s; }
   .submit-order-btn:hover { background: var(--vermelho-escuro); }
+  .submit-order-btn:disabled { background: #aaa; cursor: not-allowed; }
 
-  .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--marrom); color: white; padding: 14px 28px; border-radius: 8px; font-weight: 700; z-index: 500; transition: transform 0.3s; }
+  /* Toast — z-index 600, acima de tudo */
+  .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--marrom); color: white; padding: 14px 28px; border-radius: 8px; font-weight: 700; z-index: 600; transition: transform 0.3s; white-space: nowrap; }
   .toast.show { transform: translateX(-50%) translateY(0); }
 
   footer { background: var(--marrom); color: rgba(255,255,255,0.6); text-align: center; padding: 32px; font-size: 13px; }
@@ -116,31 +126,33 @@
 
 <div id="toast" class="toast"></div>
 
+<!-- Overlay e Sidebar do Carrinho -->
 <div class="cart-overlay" id="cartOverlay"></div>
 <div class="cart-sidebar" id="cartSidebar">
   <div class="cart-header">
-    <h3>🛒 Seu Carrinho</h3>
-    <button class="cart-close" onclick="closeCart()">✕</button>
+    <h3>&#x1F6D2; Seu Carrinho</h3>
+    <button class="cart-close" id="cartCloseBtn">&#x2715;</button>
   </div>
   <div class="cart-items" id="cartItems"></div>
   <div class="cart-footer">
     <div class="cart-total"><span>Total</span><span id="cartTotal">R$ 0,00</span></div>
-    <button class="checkout-btn" onclick="openCheckout()">Finalizar Compra</button>
+    <button class="checkout-btn" id="checkoutBtn">Finalizar Compra &#x2192;</button>
   </div>
 </div>
 
+<!-- Modal de Checkout — z-index 400, fica ACIMA do sidebar -->
 <div class="modal-overlay" id="checkoutModal">
-  <div class="modal" onclick="event.stopPropagation();">
+  <div class="modal" id="checkoutModalInner">
     <div class="modal-header">
-      <h3>🌶️ Finalizar Pedido</h3>
-      <button style="background:none;border:none;color:white;font-size:24px;cursor:pointer" onclick="closeCheckout()">✕</button>
+      <h3>&#x1F336;&#xFE0F; Finalizar Pedido</h3>
+      <button id="closeCheckoutBtn" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;line-height:1;">&#x2715;</button>
     </div>
     <div class="modal-body" id="checkoutBody"></div>
   </div>
 </div>
 
 <header>
-  <div class="header-top">✦ FRETE GRÁTIS A PARTIR DE R$ 50 ✦</div>
+  <div class="header-top">&#x2726; FRETE GR&#xC1;TIS A PARTIR DE R$ 50 &#x2726;</div>
   <div class="header-main">
     <div class="logo-wrap">
       <img src="img/logotipooficialciadecondimentos.png" alt="Cia de Condimentos" class="logo-icon" />
@@ -150,12 +162,12 @@
       </div>
     </div>
     <nav>
-      <a href="#inicio">Início</a>
+      <a href="#inicio">In&#xED;cio</a>
       <a href="#produtos">Produtos</a>
       <a href="#contato">Contato</a>
     </nav>
     <div style="display:flex;align-items:center;">
-      <button class="cart-btn" onclick="openCart()">🛒 Carrinho <span class="cart-badge" id="cartBadge">0</span></button>
+      <button class="cart-btn" id="openCartBtn">&#x1F6D2; Carrinho <span class="cart-badge" id="cartBadge">0</span></button>
     </div>
   </div>
 </header>
@@ -163,7 +175,7 @@
 <section class="hero" id="inicio">
   <div class="hero-content">
     <h1>Sabores do Mundo</h1>
-    <p>Experimente os melhores condimentos e especiarias selecionados com excelência</p>
+    <p>Experimente os melhores condimentos e especiarias selecionados com excel&#xEA;ncia</p>
     <button class="hero-btn" onclick="document.getElementById('produtos').scrollIntoView({ behavior: 'smooth' })">Comprar Agora</button>
   </div>
 </section>
@@ -186,10 +198,12 @@
 
 <footer>
   <div class="brand">Cia de Condimentos</div>
-  <p>© 2026 Todos os direitos reservados</p>
+  <p>&#xa9; 2026 Todos os direitos reservados</p>
 </footer>
 
 <script>
+'use strict';
+
 const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
   ? 'http://localhost:3000/api'
   : 'https://cia-condimentos.onrender.com/api';
@@ -198,351 +212,341 @@ let cart = [];
 let currentFilter = 'all';
 let currentSearch = '';
 
-/* ── Inicialização ── */
-document.addEventListener('DOMContentLoaded', () => {
-  var overlay = document.getElementById('cartOverlay');
-  if (overlay) overlay.addEventListener('click', closeCart);
+/* ════════════════════════════════════
+   INICIALIZACAO — todos os listeners
+   ════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', function() {
 
-  var checkoutModal = document.getElementById('checkoutModal');
-  if (checkoutModal) checkoutModal.addEventListener('click', function(e) {
+  // Abrir carrinho
+  document.getElementById('openCartBtn').addEventListener('click', openCart);
+
+  // Fechar carrinho
+  document.getElementById('cartCloseBtn').addEventListener('click', closeCart);
+  document.getElementById('cartOverlay').addEventListener('click', closeCart);
+
+  // Botao Finalizar Compra — listener unico e confiavel
+  document.getElementById('checkoutBtn').addEventListener('click', openCheckout);
+
+  // Fechar modal de checkout
+  document.getElementById('closeCheckoutBtn').addEventListener('click', closeCheckout);
+  document.getElementById('checkoutModal').addEventListener('click', function(e) {
     if (e.target === this) closeCheckout();
   });
 
   renderProducts();
 });
 
-/* ── Carrinho ── */
-function getCartElements() {
-  var sidebar = document.getElementById('cartSidebar');
-  var overlay = document.getElementById('cartOverlay');
-  // Se a extensão do navegador removeu os elementos, recria
-  if (!sidebar) {
-    sidebar = document.createElement('div');
-    sidebar.id = 'cartSidebar';
-    sidebar.className = 'cart-sidebar';
-    sidebar.innerHTML = '<div class="cart-header"><h3>🛒 Seu Carrinho</h3><button class="cart-close" onclick="closeCart()">✕</button></div><div class="cart-items" id="cartItems"></div><div class="cart-footer"><div class="cart-total"><span>Total</span><span id="cartTotal">R$ 0,00</span></div><button class="checkout-btn" onclick="openCheckout()">Finalizar Compra</button></div>';
-    document.body.insertBefore(sidebar, document.body.firstChild);
-  }
-  if (!overlay) {
-    overlay = document.createElement('div');
-    overlay.id = 'cartOverlay';
-    overlay.className = 'cart-overlay';
-    overlay.addEventListener('click', closeCart);
-    document.body.insertBefore(overlay, document.body.firstChild);
-  }
-  return { sidebar: sidebar, overlay: overlay };
-}
-
-function toggleCart() {
-  var els = getCartElements();
-  els.sidebar.classList.toggle('open');
-  els.overlay.classList.toggle('open');
-  // Re-renderiza itens ao abrir
-  if (els.sidebar.classList.contains('open')) renderCartItems();
-}
-
+/* ════════════════════════════════════
+   CARRINHO
+   ════════════════════════════════════ */
 function openCart() {
-  var els = getCartElements();
-  els.sidebar.classList.add('open');
-  els.overlay.classList.add('open');
+  const cartSidebar = document.getElementById('cartSidebar');
+  const cartOverlay = document.getElementById('cartOverlay');
+  if (cartSidebar) cartSidebar.classList.add('open');
+  if (cartOverlay) cartOverlay.classList.add('open');
   renderCartItems();
 }
 
 function closeCart() {
-  var els = getCartElements();
-  els.sidebar.classList.remove('open');
-  els.overlay.classList.remove('open');
+  const cartSidebar = document.getElementById('cartSidebar');
+  const cartOverlay = document.getElementById('cartOverlay');
+  if (cartSidebar) cartSidebar.classList.remove('open');
+  if (cartOverlay) cartOverlay.classList.remove('open');
 }
 
 function addToCart(productId) {
-  const existing = cart.find(i => i.id === productId);
-  existing ? existing.qty++ : cart.push({ id: productId, qty: 1 });
+  var existing = cart.find(function(i) { return i.id === productId; });
+  if (existing) { existing.qty++; } else { cart.push({ id: productId, qty: 1 }); }
   updateCartBadge();
   renderCartItems();
-  showToast('✅ Produto adicionado ao carrinho!');
+  showToast('Produto adicionado ao carrinho!');
 }
 
 function updateCartBadge() {
-  const badge = document.getElementById('cartBadge');
-  if (badge) badge.textContent = cart.reduce((s, i) => s + i.qty, 0);
+  var badge = document.getElementById('cartBadge');
+  if (badge) badge.textContent = cart.reduce(function(s, i) { return s + i.qty; }, 0);
 }
 
 function changeQty(productId, delta) {
-  const item = cart.find(i => i.id === productId);
+  var item = cart.find(function(i) { return i.id === productId; });
   if (!item) return;
   item.qty += delta;
-  if (item.qty <= 0) cart = cart.filter(i => i.id !== productId);
+  if (item.qty <= 0) cart = cart.filter(function(i) { return i.id !== productId; });
   updateCartBadge();
   renderCartItems();
 }
 
 function removeFromCart(productId) {
-  cart = cart.filter(i => i.id !== productId);
+  cart = cart.filter(function(i) { return i.id !== productId; });
   updateCartBadge();
   renderCartItems();
 }
 
 function renderCartItems() {
-  const container = document.getElementById('cartItems');
-  const totalEl = document.getElementById('cartTotal');
+  var container = document.getElementById('cartItems');
+  var totalEl   = document.getElementById('cartTotal');
   if (!container) return;
 
   if (cart.length === 0) {
-    container.innerHTML = '<div class="empty-cart"><div class="icon">🛒</div><p>Seu carrinho está vazio</p></div>';
+    container.innerHTML = '<div class="empty-cart"><div class="icon">&#x1F6D2;</div><p>Seu carrinho est&#xE1; vazio</p></div>';
     if (totalEl) totalEl.textContent = 'R$ 0,00';
     return;
   }
 
-  getProducts().then(products => {
-    let total = 0;
-    container.innerHTML = cart.map(item => {
-      const p = products.find(x => x.id === item.id);
+  getProducts().then(function(products) {
+    var total = 0;
+    container.innerHTML = cart.map(function(item) {
+      var p = products.find(function(x) { return x.id === item.id; });
       if (!p) return '';
-      const subtotal = p.price * item.qty;
+      var subtotal = p.price * item.qty;
       total += subtotal;
-      const imgHtml = p.image
-        ? `<img src="${p.image}" alt="${p.name}" onerror="this.parentElement.innerHTML='🌶️'">`
-        : '🌶️';
-      return `
-        <div class="cart-item">
-          <div class="cart-item-img">${imgHtml}</div>
-          <div class="cart-item-info">
-            <div class="cart-item-name">${p.name}</div>
-            <div class="cart-item-price">R$ ${subtotal.toFixed(2).replace('.', ',')}</div>
-            <div class="qty-controls">
-              <button class="qty-btn" onclick="changeQty(${p.id}, -1)">−</button>
-              <span class="qty-val">${item.qty}</span>
-              <button class="qty-btn" onclick="changeQty(${p.id}, 1)">+</button>
-              <button class="remove-btn" onclick="removeFromCart(${p.id})">🗑</button>
-            </div>
-          </div>
-        </div>`;
+      var imgHtml = p.image
+        ? '<img src="' + p.image + '" alt="' + p.name + '" onerror="this.parentElement.innerHTML=\'&#x1F336;&#xFE0F;\'">'
+        : '&#x1F336;&#xFE0F;';
+      return '<div class="cart-item">' +
+        '<div class="cart-item-img">' + imgHtml + '</div>' +
+        '<div class="cart-item-info">' +
+          '<div class="cart-item-name">' + p.name + '</div>' +
+          '<div class="cart-item-price">R$ ' + subtotal.toFixed(2).replace('.', ',') + '</div>' +
+          '<div class="qty-controls">' +
+            '<button class="qty-btn" onclick="changeQty(' + p.id + ', -1)">&#x2212;</button>' +
+            '<span class="qty-val">' + item.qty + '</span>' +
+            '<button class="qty-btn" onclick="changeQty(' + p.id + ', 1)">+</button>' +
+            '<button class="remove-btn" onclick="removeFromCart(' + p.id + ')">&#x1F5D1;</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
     }).join('');
-    if (totalEl) totalEl.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+    if (totalEl) totalEl.textContent = 'R$ ' + total.toFixed(2).replace('.', ',');
   });
 }
 
-/* ── Checkout ── */
+/* ════════════════════════════════════
+   CHECKOUT
+   ════════════════════════════════════ */
 function openCheckout() {
-  if (cart.length === 0) { showToast('⚠️ Seu carrinho está vazio!'); return; }
-  const modal = document.getElementById('checkoutModal');
-  const body  = document.getElementById('checkoutBody');
-  if (!modal || !body) return;
+  if (cart.length === 0) {
+    showToast('Seu carrinho est\u00E1 vazio!');
+    return;
+  }
 
-  getProducts().then(products => {
-    let total = 0;
-    const itemsHtml = cart.map(item => {
-      const p = products.find(x => x.id === item.id);
+  var modal = document.getElementById('checkoutModal');
+  var body  = document.getElementById('checkoutBody');
+  if (!modal || !body) {
+    console.error('Modal de checkout nao encontrado no DOM');
+    return;
+  }
+
+  getProducts().then(function(products) {
+    var total = 0;
+    var itemsHtml = cart.map(function(item) {
+      var p = products.find(function(x) { return x.id === item.id; });
       if (!p) return '';
-      const subtotal = p.price * item.qty;
+      var subtotal = p.price * item.qty;
       total += subtotal;
-      return `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0e8d0;">
-        <span>${p.name} x${item.qty}</span>
-        <span>R$ ${subtotal.toFixed(2).replace('.', ',')}</span>
-      </div>`;
+      return '<div class="order-summary-item">' +
+        '<span>' + p.name + ' <strong>x' + item.qty + '</strong></span>' +
+        '<span>R$ ' + subtotal.toFixed(2).replace('.', ',') + '</span>' +
+        '</div>';
     }).join('');
 
-    body.innerHTML = `
-      <div style="margin-bottom:20px;">${itemsHtml}</div>
-      <div style="font-size:20px;font-weight:900;display:flex;justify-content:space-between;margin-bottom:20px;">
-        <span>Total</span><span style="color:var(--vermelho)">R$ ${total.toFixed(2).replace('.', ',')}</span>
-      </div>
-      <div class="form-group"><label>Nome Completo *</label><input type="text" id="checkoutName" placeholder="Seu nome"></div>
-      <div class="form-group"><label>Telefone *</label><input type="text" id="checkoutPhone" placeholder="(81) 9 XXXX-XXXX" oninput="maskPhone(this)"></div>
-      <div class="form-group"><label>Endereço de Entrega *</label><input type="text" id="checkoutAddress" placeholder="Rua, número, bairro, cidade"></div>
-      <div class="form-group"><label>Observações</label><input type="text" id="checkoutObs" placeholder="Instruções especiais..."></div>
-      <button id="submitOrderBtn" class="submit-order-btn">✅ Confirmar Pedido via WhatsApp</button>
-    `;
+    body.innerHTML =
+      '<div class="order-summary">' +
+        itemsHtml +
+        '<div class="order-total-row"><span>Total</span><span>R$ ' + total.toFixed(2).replace('.', ',') + '</span></div>' +
+      '</div>' +
+      '<div class="form-group"><label>Nome Completo *</label><input type="text" id="checkoutName" placeholder="Seu nome completo" autocomplete="name"></div>' +
+      '<div class="form-group"><label>Telefone / WhatsApp *</label><input type="tel" id="checkoutPhone" placeholder="(81) 9 XXXX-XXXX" oninput="maskPhone(this)" autocomplete="tel"></div>' +
+      '<div class="form-group"><label>Endere\u00E7o de Entrega *</label><input type="text" id="checkoutAddress" placeholder="Rua, n\u00FAmero, bairro, cidade" autocomplete="street-address"></div>' +
+      '<div class="form-group"><label>Observa\u00E7\u00F5es</label><input type="text" id="checkoutObs" placeholder="Instru\u00E7\u00F5es especiais..."></div>' +
+      '<button class="submit-order-btn" id="submitOrderBtn">Confirmar Pedido via WhatsApp</button>';
 
-    // Fecha o carrinho e abre o modal
-    document.getElementById('cartSidebar').classList.remove('open');
-    document.getElementById('cartOverlay').classList.remove('open');
-    modal.classList.add('open');
+    // 1. Fechar carrinho
+    closeCart();
 
-    // Attach debug handler to the submit button (replaces previous handler to avoid duplicates)
-    const submitBtn = document.getElementById('submitOrderBtn');
+    // 2. Abrir modal (z-index 400 garante que fica sobre tudo)
+    if (modal) modal.classList.add('open');
+
+    // 3. Attach no botao de envio sempre fresco (innerHTML recriou o elemento)
+    var submitBtn = document.getElementById('submitOrderBtn');
     if (submitBtn) {
-      submitBtn.onclick = function (e) {
-        try {
-          console.log('DEBUG: submitOrderBtn clicked', {
-            cartLength: Array.isArray(cart) ? cart.length : 0,
-            cart: JSON.parse(JSON.stringify(cart || [])),
-            formValues: {
-              name: document.getElementById('checkoutName')?.value,
-              phone: document.getElementById('checkoutPhone')?.value,
-              address: document.getElementById('checkoutAddress')?.value
-            }
-          });
-        } catch (err) {
-          console.log('DEBUG: error serializing cart for log', err);
-        }
-        // chamar a função principal de envio
-        submitOrder();
-      };
+      submitBtn.addEventListener('click', submitOrder);
+    } else {
+      console.warn('submitOrderBtn nao encontrado no DOM');
     }
   });
 }
 
 function closeCheckout() {
-  document.getElementById('checkoutModal').classList.remove('open');
+  const checkoutModal = document.getElementById('checkoutModal');
+  if (checkoutModal) checkoutModal.classList.remove('open');
 }
 
-async function submitOrder() {
-  const name    = document.getElementById('checkoutName')?.value?.trim();
-  const phone   = document.getElementById('checkoutPhone')?.value?.trim();
-  const address = document.getElementById('checkoutAddress')?.value?.trim();
-  const obs     = document.getElementById('checkoutObs')?.value?.trim();
+function submitOrder() {
+  var btn     = document.getElementById('submitOrderBtn');
+  var name    = (document.getElementById('checkoutName') || {}).value;
+  var phone   = (document.getElementById('checkoutPhone') || {}).value;
+  var address = (document.getElementById('checkoutAddress') || {}).value;
+  var obs     = (document.getElementById('checkoutObs') || {}).value;
 
-  if (!name || !phone || !address) { 
-    showToast('⚠️ Preencha todos os campos obrigatórios!'); 
-    return; 
+  if (name) name = name.trim();
+  if (phone) phone = phone.trim();
+  if (address) address = address.trim();
+  if (obs) obs = obs.trim();
+
+  if (!name || !phone || !address) {
+    showToast('Preencha todos os campos obrigat\u00F3rios!');
+    return;
   }
 
-  try {
-    const products = await getProducts();
-    let total = 0;
-    const orderItems = cart.map(item => {
-      const p = products.find(x => x.id === item.id);
+  if (btn) { btn.disabled = true; btn.textContent = 'Enviando...'; }
+
+  getProducts().then(function(products) {
+    var total = 0;
+    var orderItems = cart.map(function(item) {
+      var p = products.find(function(x) { return x.id === item.id; });
       if (!p) return null;
-      const subtotal = p.price * item.qty;
+      var subtotal = p.price * item.qty;
       total += subtotal;
-      return {
-        id: item.id,
-        qty: item.qty,
-        price: p.price,
-        name: p.name
-      };
+      return { id: item.id, qty: item.qty, price: p.price, name: p.name };
     }).filter(Boolean);
 
     if (orderItems.length === 0) {
-      showToast('❌ Erro: Nenhum produto válido no carrinho');
+      showToast('Erro: Nenhum produto v\u00E1lido no carrinho');
+      if (btn) { btn.disabled = false; btn.textContent = 'Confirmar Pedido via WhatsApp'; }
       return;
     }
 
-    // Salvar pedido no backend
-    const orderData = {
-      customer: {
-        name: name,
-        email: '', // Opcional por enquanto
-        phone: phone,
-        cpf: '', // Opcional por enquanto
-        address: address
-      },
+    var orderData = {
+      customer: { name: name, email: '', phone: phone, cpf: '', address: address },
       items: orderItems,
       subtotal: total,
-      frete: 0, // Frete grátis ou calcular
+      frete: 0,
       total: total,
       payment: 'WhatsApp',
       status: 'Pendente',
       paymentStatus: 'Aguardando'
     };
 
-    const response = await fetch(`${API_URL}/orders`, {
+    fetch(API_URL + '/orders', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(orderData)
+    })
+    .then(function(response) {
+      if (!response.ok) {
+        return response.json().catch(function() { return {}; }).then(function(err) {
+          throw new Error(err.error || ('Erro ' + response.status + ' ao salvar pedido'));
+        });
+      }
+      return response.json();
+    })
+    .then(function(orderResult) {
+      var lines = orderItems.map(function(item) {
+        return '\u2022 ' + item.name + ' x' + item.qty + ' = R$ ' + (item.price * item.qty).toFixed(2).replace('.', ',');
+      }).join('\n');
+
+      var msg = '\uD83C\uDF36\uFE0F *NOVO PEDIDO - Cia de Condimentos*\n\n' +
+        '\uD83D\uDC64 *Cliente:* ' + name + '\n' +
+        '\uD83D\uDCF1 *Telefone:* ' + phone + '\n' +
+        '\uD83D\uDCCD *Endere\u00E7o:* ' + address + '\n' +
+        (obs ? '\uD83D\uDCDD *Obs:* ' + obs + '\n' : '') +
+        '\n*Itens:*\n' + lines + '\n\n' +
+        '\uD83D\uDCB0 *Total: R$ ' + total.toFixed(2).replace('.', ',') + '*\n\n' +
+        '*Pedido #' + orderResult.id + '*';
+
+      window.open('https://wa.me/5581999999999?text=' + encodeURIComponent(msg), '_blank');
+
+      cart = [];
+      updateCartBadge();
+      closeCheckout();
+      showToast('Pedido enviado via WhatsApp!');
+    })
+    .catch(function(error) {
+      console.error('Erro ao enviar pedido:', error);
+      showToast('Erro: ' + error.message);
+      if (btn) { btn.disabled = false; btn.textContent = 'Confirmar Pedido via WhatsApp'; }
     });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Erro ao salvar pedido');
-    }
-
-    const orderResult = await response.json();
-
-    // Gerar mensagem do WhatsApp
-    const lines = orderItems.map(item => 
-      `• ${item.name} x${item.qty} = R$ ${(item.price * item.qty).toFixed(2).replace('.', ',')}`
-    ).join('\n');
-
-    const msg = `🌶️ *NOVO PEDIDO - Cia de Condimentos*\n\n👤 *Cliente:* ${name}\n📱 *Telefone:* ${phone}\n📍 *Endereço:* ${address}\n${obs ? `📝 *Obs:* ${obs}\n` : ''}\n*Itens:*\n${lines}\n\n💰 *Total: R$ ${total.toFixed(2).replace('.', ',')}*\n\n*Pedido #${orderResult.id}*`;
-
-    // Abrir WhatsApp
-    window.open(`https://wa.me/5581999999999?text=${encodeURIComponent(msg)}`, '_blank');
-    
-    // Limpar carrinho e fechar modal
-    cart = [];
-    updateCartBadge();
-    closeCheckout();
-    showToast('✅ Pedido enviado via WhatsApp!');
-
-  } catch (error) {
-    console.error('Error submitting order:', error);
-    showToast(`❌ Erro ao enviar pedido: ${error.message}`);
-  }
+  });
 }
 
-/* ── Produtos ── */
-async function getProducts() {
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10000);
-    const response = await fetch(`${API_URL}/products`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-      signal: controller.signal
-    });
+/* ════════════════════════════════════
+   PRODUTOS
+   ════════════════════════════════════ */
+function getProducts() {
+  var controller = new AbortController();
+  var timeout = setTimeout(function() { controller.abort(); }, 10000);
+  return fetch(API_URL + '/products', {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+    signal: controller.signal
+  })
+  .then(function(response) {
     clearTimeout(timeout);
     if (response.ok) {
-      const products = await response.json();
-      return products.map(p => ({ ...p, price: parseFloat(p.price) || 0 }));
+      return response.json().then(function(products) {
+        return products.map(function(p) { return Object.assign({}, p, { price: parseFloat(p.price) || 0 }); });
+      });
     }
-  } catch (e) {
+    throw new Error('Response not ok');
+  })
+  .catch(function(e) {
+    clearTimeout(timeout);
     if (e.name === 'AbortError') {
-      showToast('Servidor demorando. Tentando novamente...');
+      showToast('Servidor demorando. Verifique sua conex\u00E3o.');
     } else {
-      showToast('Erro ao conectar com o servidor');
+      showToast('Erro ao carregar produtos. Tente novamente.');
     }
-  }
-  return [{ id: 1, name: 'Produto Demo', category: 'Demo', price: 19.90, stock: 10, active: true, image: null, description: 'Produto de demonstração' }];
+    return [];
+  });
 }
 
-async function renderProducts() {
-  const products = await getProducts();
-  let filtered = products.filter(p =>
-    p.active && (currentFilter === 'all' || p.category === currentFilter)
-  );
-  if (currentSearch) {
-    filtered = filtered.filter(p =>
-      p.name.toLowerCase().includes(currentSearch) ||
-      (p.description || '').toLowerCase().includes(currentSearch)
-    );
-  }
+function renderProducts() {
+  getProducts().then(function(products) {
+    var filtered = products.filter(function(p) {
+      return p.active && (currentFilter === 'all' || p.category === currentFilter);
+    });
+    if (currentSearch) {
+      filtered = filtered.filter(function(p) {
+        return p.name.toLowerCase().indexOf(currentSearch) !== -1 ||
+          (p.description || '').toLowerCase().indexOf(currentSearch) !== -1;
+      });
+    }
 
-  const grid = document.getElementById('productsGrid');
-  if (!grid) return;
+    var grid = document.getElementById('productsGrid');
+    if (!grid) return;
 
-  if (filtered.length === 0) {
-    grid.innerHTML = '<div class="no-products">Nenhum produto encontrado.</div>';
-    return;
-  }
+    if (filtered.length === 0) {
+      grid.innerHTML = '<div class="no-products">Nenhum produto encontrado.</div>';
+      return;
+    }
 
-  grid.innerHTML = filtered.map(p => {
-    const imgHtml = p.image
-      ? `<img src="${p.image}" alt="${p.name}" onerror="this.parentElement.innerHTML='🌶️'">`
-      : '🌶️';
-    return `
-      <div class="product-card">
-        <div class="product-img">${imgHtml}</div>
-        <div class="product-body">
-          <div class="product-category">${p.category || ''}</div>
-          <div class="product-name">${p.name}</div>
-          <div class="product-desc">${p.description || ''}</div>
-          <div class="product-stock">Estoque: ${p.stock} unidades</div>
-          <div class="product-footer">
-            <div class="product-price">R$ ${p.price.toFixed(2).replace('.', ',')}</div>
-            <button class="add-cart-btn" onclick="addToCart(${p.id})" ${p.stock === 0 ? 'disabled' : ''}>
-              ${p.stock === 0 ? 'Esgotado' : 'Adicionar'}
-            </button>
-          </div>
-        </div>
-      </div>`;
-  }).join('');
+    grid.innerHTML = filtered.map(function(p) {
+      var imgHtml = p.image
+        ? '<img src="' + p.image + '" alt="' + p.name + '" onerror="this.parentElement.innerHTML=\'&#x1F336;&#xFE0F;\'">'
+        : '&#x1F336;&#xFE0F;';
+      return '<div class="product-card">' +
+        '<div class="product-img">' + imgHtml + '</div>' +
+        '<div class="product-body">' +
+          '<div class="product-category">' + (p.category || '') + '</div>' +
+          '<div class="product-name">' + p.name + '</div>' +
+          '<div class="product-desc">' + (p.description || '') + '</div>' +
+          '<div class="product-stock">Estoque: ' + p.stock + ' unidades</div>' +
+          '<div class="product-footer">' +
+            '<div class="product-price">R$ ' + p.price.toFixed(2).replace('.', ',') + '</div>' +
+            '<button class="add-cart-btn" onclick="addToCart(' + p.id + ')" ' + (p.stock === 0 ? 'disabled' : '') + '>' +
+              (p.stock === 0 ? 'Esgotado' : 'Adicionar') +
+            '</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  });
 }
 
 function filterProducts(category, btn) {
   currentFilter = category;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
   btn.classList.add('active');
   renderProducts();
 }
@@ -552,21 +556,22 @@ function handleSearch(val) {
   renderProducts();
 }
 
-/* ── Máscara ── */
+/* ════════════════════════════════════
+   UTILITARIOS
+   ════════════════════════════════════ */
 function maskPhone(input) {
-  let v = input.value.replace(/\D/g, '').slice(0, 11);
-  if (v.length <= 2) input.value = v.length ? `(${v}` : v;
-  else if (v.length <= 7) input.value = `(${v.slice(0,2)}) ${v.slice(2)}`;
-  else input.value = `(${v.slice(0,2)}) ${v.slice(2,7)}-${v.slice(7)}`;
+  var v = input.value.replace(/\D/g, '').slice(0, 11);
+  if (v.length <= 2)      input.value = v.length ? '(' + v : v;
+  else if (v.length <= 7) input.value = '(' + v.slice(0,2) + ') ' + v.slice(2);
+  else                    input.value = '(' + v.slice(0,2) + ') ' + v.slice(2,7) + '-' + v.slice(7);
 }
 
-/* ── Toast ── */
 function showToast(msg) {
-  const t = document.getElementById('toast');
+  var t = document.getElementById('toast');
   if (!t) return;
   t.textContent = msg;
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
+  setTimeout(function() { t.classList.remove('show'); }, 3000);
 }
 </script>
 </body>
