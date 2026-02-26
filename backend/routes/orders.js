@@ -12,7 +12,7 @@ router.post('/', async (req, res) => {
     }
 
     const { name, email, phone, cpf, address } = customer;
-    if (!name || !email || !phone || !address) {
+    if (!name || !phone || !address) {
       return res.status(400).json({ error: 'Missing customer fields' });
     }
 

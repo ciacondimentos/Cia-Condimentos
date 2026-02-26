@@ -448,9 +448,151 @@ function choosePaymentMethod() {
 }
 
 function selectPaymentMethod(method) {
-  console.log('Forma de pagamento selecionada:', method);
-  showToast('Forma de pagamento: ' + method.toUpperCase());
-  // Aqui voce dira o que fazer depois com cada forma de pagamento
+  if (method === 'cartao') {
+    showCardConfirmation();
+  } else {
+    console.log('Forma de pagamento selecionada:', method);
+    showToast('Forma de pagamento: ' + method.toUpperCase());
+  }
+}
+
+function showCardConfirmation() {
+  var confirmationHtml = 
+    '<div style="text-align: center; padding: 40px 20px;">' +
+      '<h3 style="color: var(--marrom); font-family: Playfair Display, serif; font-size: 22px; margin-bottom: 24px;">Você confirma o pagamento com cartão?</h3>' +
+      '<div style="display: flex; gap: 16px; justify-content: center;">' +
+        '<button onclick="confirmCardPayment()" style="background: var(--vermelho); color: white; border: none; padding: 16px 48px; font-weight: 900; cursor: pointer; border-radius: 4px; font-size: 16px; letter-spacing: 1px;">Confirmar</button>' +
+        '<button onclick="cancelCardPayment()" style="background: #ccc; color: var(--marrom); border: none; padding: 16px 48px; font-weight: 900; cursor: pointer; border-radius: 4px; font-size: 16px; letter-spacing: 1px;">Cancelar</button>' +
+      '</div>' +
+    '</div>';
+  
+  var body = document.getElementById('checkoutBody');
+  if (body) {
+    body.innerHTML = confirmationHtml;
+  }
+}
+
+function confirmCardPayment() {
+  submitOrderWithCardPayment();
+}
+
+function cancelCardPayment() {
+  // Voltar para tela de escolha de pagamento
+  choosePaymentMethod();
+}
+
+function submitOrderWithCardPayment() {
+  var btn = document.getElementById('checkoutBody');
+  var name = window.checkoutData.name;
+  var phone = window.checkoutData.phone;
+  var address = window.checkoutData.address;
+  var obs = window.checkoutData.obs;
+
+  if (btn) { 
+    var buttons = btn.querySelectorAll('button');
+    buttons.forEach(function(b) { b.disabled = true; });
+  }
+
+  getProducts().then(function(products) {
+    var total = 0;
+    var orderItems = cart.map(function(item) {
+      var p = products.find(function(x) { return x.id === item.id; });
+      if (!p) return null;
+      var subtotal = p.price * item.qty;
+      total += subtotal;
+      return { id: item.id, qty: item.qty, price: p.price, name: p.name };
+    }).filter(Boolean);
+
+    if (orderItems.length === 0) {
+      showToast('Erro: Nenhum produto válido no carrinho');
+      if (btn) { 
+        var buttons = btn.querySelectorAll('button');
+        buttons.forEach(function(b) { b.disabled = false; });
+      }
+      return;
+    }
+
+    var orderData = {
+      customer: { name: name, email: '', phone: phone, cpf: '', address: address },
+      items: orderItems,
+      subtotal: total,
+      frete: 0,
+      total: total,
+      payment: 'Cartão',
+      status: 'Confirmado',
+      paymentStatus: 'Aprovado'
+    };
+
+    fetch(API_URL + '/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(orderData)
+    })
+    .then(function(response) {
+      if (!response.ok) {
+        return response.json().catch(function() { return {}; }).then(function(err) {
+          throw new Error(err.error || ('Erro ' + response.status + ' ao salvar pedido'));
+        });
+      }
+      return response.json();
+    })
+    .then(function(orderResult) {
+      var lines = orderItems.map(function(item) {
+        return '• ' + item.name + ' x' + item.qty + ' = R$ ' + (item.price * item.qty).toFixed(2).replace('.', ',');
+      }).join('\n');
+
+      var whatsappMsg = '🌶️ *NOVO PEDIDO - Cia de Condimentos*\n\n' +
+        '👤 *Cliente:* ' + name + '\n' +
+        '📱 *Telefone:* ' + phone + '\n' +
+        '📍 *Endereço:* ' + address + '\n' +
+        (obs ? '📝 *Obs:* ' + obs + '\n' : '') +
+        '\n*Itens:*\n' + lines + '\n\n' +
+        '💰 *Total: R$ ' + total.toFixed(2).replace('.', ',') + '*\n\n' +
+        '*Pedido #' + orderResult.id + '*';
+
+      showOrderSuccess(orderResult.id, whatsappMsg);
+      cart = [];
+      updateCartBadge();
+    })
+    .catch(function(error) {
+      console.error('Erro ao enviar pedido:', error);
+      showToast('Erro: ' + error.message);
+      if (btn) { 
+        var buttons = btn.querySelectorAll('button');
+        buttons.forEach(function(b) { b.disabled = false; });
+      }
+    });
+  });
+}
+
+function showOrderSuccess(orderId, whatsappMsg) {
+  var body = document.getElementById('checkoutBody');
+  if (!body) return;
+
+  var successHtml = 
+    '<div style="text-align: center; padding: 40px 20px;">' +
+      '<div style="font-size: 48px; margin-bottom: 20px;">✓</div>' +
+      '<h3 style="color: var(--vermelho); font-family: Playfair Display, serif; font-size: 24px; margin-bottom: 12px;">Pedido Finalizado com Sucesso!</h3>' +
+      '<p style="color: #666; font-size: 16px; margin-bottom: 24px;">Número do Pedido:</p>' +
+      '<div style="background: #fdf8ee; padding: 20px; border-radius: 8px; margin-bottom: 24px; border: 2px solid var(--amarelo);">' +
+        '<p style="font-size: 32px; font-weight: 900; color: var(--vermelho);">#' + orderId + '</p>' +
+      '</div>' +
+      '<p style="color: #666; font-size: 14px; margin-bottom: 20px;"><em>Guarde este número para acompanhar seu pedido</em></p>' +
+      '<button onclick="sendOrderViaWhatsapp(\'' + whatsappMsg.replace(/'/g, '&#39;') + '\')" style="width: 100%; background: #25D366; color: white; border: none; padding: 16px; font-weight: 900; cursor: pointer; border-radius: 4px; font-size: 16px; letter-spacing: 1px; margin-bottom: 12px;">📱 Enviar Pedido pelo WhatsApp</button>' +
+      '<p style="color: #999; font-size: 12px; margin-bottom: 12px;">(Opcional - para reforçar o pedido)</p>' +
+      '<button onclick="finishCheckout()" style="width: 100%; background: var(--marrom); color: white; border: none; padding: 16px; font-weight: 700; cursor: pointer; border-radius: 4px; font-size: 16px; letter-spacing: 1px;">Finalizar</button>' +
+    '</div>';
+
+  body.innerHTML = successHtml;
+}
+
+function sendOrderViaWhatsapp(msg) {
+  window.open('https://wa.me/5581971132776?text=' + encodeURIComponent(msg), '_blank');
+}
+
+function finishCheckout() {
+  closeCheckout();
+  showToast('Obrigado pela sua compra!');
 }
 
 function submitOrder() {
