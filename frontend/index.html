@@ -17,7 +17,7 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Lato', sans-serif; background: var(--creme); color: var(--marrom); }
 
-  header { background: var(--vermelho); position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+  header { background: var(--vermelho); position: sticky; top: 0; z-index: 50; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
   .header-top { background: var(--amarelo); text-align: center; padding: 6px; font-size: 12px; font-weight: 700; letter-spacing: 2px; color: var(--vermelho-escuro); }
   .header-main { display: flex; align-items: center; justify-content: space-between; padding: 16px 40px; }
   .logo-wrap { display: flex; align-items: center; gap: 12px; }
@@ -66,10 +66,10 @@
   .add-cart-btn:hover { background: var(--vermelho-escuro); transform: scale(1.05); }
   .add-cart-btn:disabled { background: #ccc; cursor: not-allowed; }
 
-  /* Carrinho Sidebar — z-index 200/201 */
-  .cart-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 200; display: none; }
+  /* Carrinho Sidebar — z-index 1000/1001, acima do header (50) */
+  .cart-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; display: none; }
   .cart-overlay.open { display: block; }
-  .cart-sidebar { position: fixed; top: 0; right: 0; width: 440px; height: 100vh; background: white; z-index: 201; display: flex; flex-direction: column; transform: translateX(500px); transition: transform 0.3s ease-in-out; box-shadow: -8px 0 40px rgba(0,0,0,0.2); }
+  .cart-sidebar { position: fixed; top: 0; right: 0; width: 440px; height: 100vh; background: white; z-index: 1001; display: flex; flex-direction: column; transform: translateX(500px); transition: transform 0.3s ease-in-out; box-shadow: -8px 0 40px rgba(0,0,0,0.2); }
   .cart-sidebar.open { transform: translateX(0); }
   .cart-header { background: var(--vermelho); color: white; padding: 24px; display: flex; justify-content: space-between; align-items: center; }
   .cart-header h3 { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; }
@@ -93,8 +93,8 @@
   .empty-cart { text-align: center; padding: 60px 20px; color: #aaa; }
   .empty-cart .icon { font-size: 60px; margin-bottom: 16px; }
 
-  /* Modal de Checkout — z-index 400, ACIMA do sidebar (201) */
-  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 400; display: none; align-items: center; justify-content: center; padding: 20px; }
+  /* Modal de Checkout — z-index 1200, ACIMA do sidebar (1001) */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 1200; display: none; align-items: center; justify-content: center; padding: 20px; }
   .modal-overlay.open { display: flex; }
   .modal { background: white; border-radius: 12px; max-width: 560px; width: 100%; overflow: hidden; max-height: 90vh; display: flex; flex-direction: column; }
   .modal-header { background: var(--vermelho); padding: 24px 28px; color: white; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
@@ -113,8 +113,24 @@
   .submit-order-btn:hover { background: var(--vermelho-escuro); }
   .submit-order-btn:disabled { background: #aaa; cursor: not-allowed; }
 
-  /* Toast — z-index 600, acima de tudo */
-  .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--marrom); color: white; padding: 14px 28px; border-radius: 8px; font-weight: 700; z-index: 600; transition: transform 0.3s; white-space: nowrap; }
+  /* Payment Method Selection */
+  .payment-methods-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 24px; }
+  .payment-method-card { border: 2px solid #e8e0d4; border-radius: 8px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.3s; background: white; }
+  .payment-method-card:hover { border-color: var(--vermelho); background: #fff9f5; transform: translateY(-2px); }
+  .payment-method-card.selected { border-color: var(--vermelho); background: #ffe5e0; }
+  .payment-method-icon { font-size: 48px; margin-bottom: 12px; }
+  .payment-method-name { font-weight: 900; color: var(--marrom); font-size: 16px; }
+
+  /* Payment Method Selection */
+  .payment-methods-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 24px; }
+  .payment-method-card { border: 2px solid #e8e0d4; border-radius: 8px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.3s; background: white; }
+  .payment-method-card:hover { border-color: var(--vermelho); background: #fff9f5; transform: translateY(-2px); }
+  .payment-method-card.selected { border-color: var(--vermelho); background: #ffe5e0; }
+  .payment-method-icon { font-size: 48px; margin-bottom: 12px; }
+  .payment-method-name { font-weight: 900; color: var(--marrom); font-size: 16px; }
+
+  /* Toast — z-index 1500, acima de tudo */
+  .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--marrom); color: white; padding: 14px 28px; border-radius: 8px; font-weight: 700; z-index: 1500; transition: transform 0.3s; white-space: nowrap; }
   .toast.show { transform: translateX(-50%) translateY(0); }
 
   footer { background: var(--marrom); color: rgba(255,255,255,0.6); text-align: center; padding: 32px; font-size: 13px; }
@@ -217,21 +233,30 @@ let currentSearch = '';
    ════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', function() {
 
+  function safeListener(id, event, fn) {
+    var el = document.getElementById(id);
+    if (el) { el.addEventListener(event, fn); }
+    else { console.warn('Elemento nao encontrado: #' + id); }
+  }
+
   // Abrir carrinho
-  document.getElementById('openCartBtn').addEventListener('click', openCart);
+  safeListener('openCartBtn', 'click', openCart);
 
   // Fechar carrinho
-  document.getElementById('cartCloseBtn').addEventListener('click', closeCart);
-  document.getElementById('cartOverlay').addEventListener('click', closeCart);
+  safeListener('cartCloseBtn', 'click', closeCart);
+  safeListener('cartOverlay',  'click', closeCart);
 
-  // Botao Finalizar Compra — listener unico e confiavel
-  document.getElementById('checkoutBtn').addEventListener('click', openCheckout);
+  // Botao Finalizar Compra
+  safeListener('checkoutBtn', 'click', openCheckout);
 
   // Fechar modal de checkout
-  document.getElementById('closeCheckoutBtn').addEventListener('click', closeCheckout);
-  document.getElementById('checkoutModal').addEventListener('click', function(e) {
-    if (e.target === this) closeCheckout();
-  });
+  safeListener('closeCheckoutBtn', 'click', closeCheckout);
+  var checkoutModal = document.getElementById('checkoutModal');
+  if (checkoutModal) {
+    checkoutModal.addEventListener('click', function(e) {
+      if (e.target === this) closeCheckout();
+    });
+  }
 
   renderProducts();
 });
@@ -240,18 +265,19 @@ document.addEventListener('DOMContentLoaded', function() {
    CARRINHO
    ════════════════════════════════════ */
 function openCart() {
-  const cartSidebar = document.getElementById('cartSidebar');
-  const cartOverlay = document.getElementById('cartOverlay');
-  if (cartSidebar) cartSidebar.classList.add('open');
-  if (cartOverlay) cartOverlay.classList.add('open');
+  var sidebar = document.getElementById('cartSidebar');
+  var overlay = document.getElementById('cartOverlay');
+  if (!sidebar || !overlay) { console.error('Elementos do carrinho nao encontrados'); return; }
+  sidebar.classList.add('open');
+  overlay.classList.add('open');
   renderCartItems();
 }
 
 function closeCart() {
-  const cartSidebar = document.getElementById('cartSidebar');
-  const cartOverlay = document.getElementById('cartOverlay');
-  if (cartSidebar) cartSidebar.classList.remove('open');
-  if (cartOverlay) cartOverlay.classList.remove('open');
+  var sidebar = document.getElementById('cartSidebar');
+  var overlay = document.getElementById('cartOverlay');
+  if (sidebar) sidebar.classList.remove('open');
+  if (overlay) overlay.classList.remove('open');
 }
 
 function addToCart(productId) {
@@ -359,27 +385,72 @@ function openCheckout() {
       '<div class="form-group"><label>Telefone / WhatsApp *</label><input type="tel" id="checkoutPhone" placeholder="(81) 9 XXXX-XXXX" oninput="maskPhone(this)" autocomplete="tel"></div>' +
       '<div class="form-group"><label>Endere\u00E7o de Entrega *</label><input type="text" id="checkoutAddress" placeholder="Rua, n\u00FAmero, bairro, cidade" autocomplete="street-address"></div>' +
       '<div class="form-group"><label>Observa\u00E7\u00F5es</label><input type="text" id="checkoutObs" placeholder="Instru\u00E7\u00F5es especiais..."></div>' +
-      '<button class="submit-order-btn" id="submitOrderBtn">Confirmar Pedido via WhatsApp</button>';
+      '<button class="submit-order-btn" id="submitOrderBtn">Escolher Forma de Pagamento</button>';
 
     // 1. Fechar carrinho
     closeCart();
 
     // 2. Abrir modal (z-index 400 garante que fica sobre tudo)
-    if (modal) modal.classList.add('open');
+    modal.classList.add('open');
 
     // 3. Attach no botao de envio sempre fresco (innerHTML recriou o elemento)
     var submitBtn = document.getElementById('submitOrderBtn');
     if (submitBtn) {
-      submitBtn.addEventListener('click', submitOrder);
-    } else {
-      console.warn('submitOrderBtn nao encontrado no DOM');
+      submitBtn.addEventListener('click', choosePaymentMethod);
     }
   });
 }
 
 function closeCheckout() {
-  const checkoutModal = document.getElementById('checkoutModal');
-  if (checkoutModal) checkoutModal.classList.remove('open');
+  document.getElementById('checkoutModal').classList.remove('open');
+}
+
+function choosePaymentMethod() {
+  var name    = (document.getElementById('checkoutName') || {}).value;
+  var phone   = (document.getElementById('checkoutPhone') || {}).value;
+  var address = (document.getElementById('checkoutAddress') || {}).value;
+
+  if (!name || !phone || !address) {
+    showToast('Preencha todos os campos obrigatorios!');
+    return;
+  }
+
+  // Guardar dados do cliente em variavel global (para usar depois)
+  window.checkoutData = {
+    name: name,
+    phone: phone,
+    address: address,
+    obs: (document.getElementById('checkoutObs') || {}).value || ''
+  };
+
+  // Mostrar opcoes de pagamento
+  var body = document.getElementById('checkoutBody');
+  if (!body) return;
+
+  body.innerHTML = 
+    '<div style="text-align: center; margin-bottom: 24px;">' +
+      '<h3 style="color: var(--marrom); font-family: Playfair Display, serif; font-size: 20px;">Escolha a Forma de Pagamento</h3>' +
+    '</div>' +
+    '<div class="payment-methods-container">' +
+      '<div class="payment-method-card" onclick="selectPaymentMethod(\'pix\')">' +
+        '<div class="payment-method-icon">🔐</div>' +
+        '<div class="payment-method-name">PIX</div>' +
+      '</div>' +
+      '<div class="payment-method-card" onclick="selectPaymentMethod(\'dinheiro\')">' +
+        '<div class="payment-method-icon">💵</div>' +
+        '<div class="payment-method-name">Dinheiro</div>' +
+      '</div>' +
+      '<div class="payment-method-card" onclick="selectPaymentMethod(\'cartao\')">' +
+        '<div class="payment-method-icon">💳</div>' +
+        '<div class="payment-method-name">Cartão</div>' +
+      '</div>' +
+    '</div>';
+}
+
+function selectPaymentMethod(method) {
+  console.log('Forma de pagamento selecionada:', method);
+  showToast('Forma de pagamento: ' + method.toUpperCase());
+  // Aqui voce dira o que fazer depois com cada forma de pagamento
 }
 
 function submitOrder() {
