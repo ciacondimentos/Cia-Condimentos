@@ -655,8 +655,20 @@ function saveOrderStatus() {
 
 function deleteOrder(id) {
   showConfirm(`Tem certeza que deseja deletar o pedido ${id}?`, () => {
-    showToast('Pedido deletado com sucesso!');
-    renderOrdersTableAsync();
+    fetch(`${API_BASE}/orders/${id}`, { method: 'DELETE' })
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) {
+          showToast('Erro ao deletar pedido: ' + data.error, 'error');
+        } else {
+          showToast('Pedido deletado com sucesso!');
+          renderOrdersTableAsync();
+        }
+      })
+      .catch(err => {
+        console.error('Error deleting order:', err);
+        showToast('Erro ao deletar pedido', 'error');
+      });
   });
 }
 

@@ -118,4 +118,25 @@ router.put('/:id', async (req, res) => {
   }
 });
 
+// DELETE order (admin)
+router.delete('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // first remove order items
+    await db.query('DELETE FROM order_items WHERE order_id = $1', [id]);
+    // then remove order itself
+    const result = await db.query('DELETE FROM orders WHERE id = $1 RETURNING id', [id]);
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting order:', error);
+    res.status(500).json({ error: 'Failed to delete order' });
+  }
+});
+
 module.exports = router;
