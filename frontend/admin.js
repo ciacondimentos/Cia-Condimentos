@@ -702,14 +702,16 @@ function renderCustomersTable(customers) {
   const tbody = document.getElementById('customersTableBody');
   tbody.innerHTML = filtered.map(customer => {
     const registered = new Date(customer.created_at).toLocaleDateString('pt-BR');
+    const totalOrders = customer.total_orders || 0;
+    const totalSpent = parseFloat(customer.total_spent || 0).toFixed(2);
     return `
       <tr>
         <td>${customer.name || 'N/A'}</td>
         <td>${customer.email || 'N/A'}</td>
         <td>${customer.phone || 'N/A'}</td>
         <td>${customer.cpf || 'N/A'}</td>
-        <td>0</td>
-        <td>R$ 0.00</td>
+        <td>${totalOrders}</td>
+        <td>R$ ${totalSpent}</td>
         <td>${registered}</td>
         <td>
           <button class="btn btn-sm btn-ghost" onclick="editCustomer(${customer.id})">✏️</button>
@@ -780,6 +782,16 @@ function openAddCustomer(customer = null) {
       </div>
     </div>
     <div class="form-row-2">
+      <div class="fg">
+        <label>Pedidos</label>
+        <input type="number" id="custTotalOrders" placeholder="0" min="0" value="${customer ? (customer.total_orders || 0) : 0}">
+      </div>
+      <div class="fg">
+        <label>Total Gasto (R$)</label>
+        <input type="number" step="0.01" id="custTotalSpent" placeholder="0.00" min="0" value="${customer ? (customer.total_spent ? parseFloat(customer.total_spent).toFixed(2) : '0.00') : '0.00'}">
+      </div>
+    </div>
+    <div class="form-row-2">
       <div class="fg" style="grid-column: 1 / -1;">
         <label>Notas/Observações</label>
         <textarea id="custNotes" placeholder="Anotações sobre o cliente" style="min-height: 80px; resize: vertical;">${customer ? customer.notes || '' : ''}</textarea>
@@ -815,6 +827,12 @@ function saveCustomer() {
     zip: document.getElementById('custZip')?.value || '',
     notes: document.getElementById('custNotes')?.value || ''
   };
+
+  // Totais (opcionais)
+  const totalOrdersVal = parseInt(document.getElementById('custTotalOrders')?.value, 10);
+  const totalSpentVal = parseFloat((document.getElementById('custTotalSpent')?.value || '').toString().replace(',', '.'));
+  customerData.total_orders = isNaN(totalOrdersVal) ? 0 : totalOrdersVal;
+  customerData.total_spent = isNaN(totalSpentVal) ? 0 : totalSpentVal;
   
   const method = id ? 'PUT' : 'POST';
   const url = id ? `${API_BASE}/auth/admin/customers/${id}` : `${API_BASE}/auth/admin/customers`;

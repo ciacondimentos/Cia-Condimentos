@@ -112,13 +112,15 @@ router.get('/me', async (req, res) => {
 // Listar todos os usuários/clientes
 router.get('/users', async (req, res) => {
   try{
-    const result = await db.query('select id,name,cpf,phone,email,created_at from users order by created_at desc');
+    const result = await db.query('select id,name,cpf,phone,email,created_at,total_orders,total_spent from users order by created_at desc');
     const customers = result.rows.map(u => ({
       id: u.id,
       name: u.name,
       cpf: u.cpf,
       phone: u.phone,
       email: u.email,
+      total_orders: u.total_orders || 0,
+      total_spent: parseFloat(u.total_spent) || 0,
       createdAt: u.created_at
     }));
     res.json(customers);
@@ -131,7 +133,7 @@ router.get('/users', async (req, res) => {
 // ADMIN - Criar um novo cliente manualmente
 router.post('/admin/customers', async (req, res) => {
   try {
-    const { name, email, phone, cpf, address, city, state, zip, notes } = req.body;
+    const { name, email, phone, cpf, address, city, state, zip, notes, total_orders, total_spent } = req.body;
     
     if (!name) {
       return res.status(400).json({ error: 'Nome é obrigatório' });
@@ -150,10 +152,10 @@ router.post('/admin/customers', async (req, res) => {
     const hash = await bcrypt.hash(randomPassword, 10);
 
     const result = await db.query(
-      `INSERT INTO users(name, email, phone, cpf, password_hash, address, city, state, zip, notes, email_confirmed)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, true)
-       RETURNING id, name, email, phone, cpf, address, city, state, zip, notes, created_at`,
-      [name, email || null, phone || null, cpf || null, hash, address || null, city || null, state || null, zip || null, notes || null]
+      `INSERT INTO users(name, email, phone, cpf, password_hash, address, city, state, zip, notes, total_orders, total_spent, email_confirmed)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, true)
+       RETURNING id, name, email, phone, cpf, address, city, state, zip, notes, total_orders, total_spent, created_at`,
+      [name, email || null, phone || null, cpf || null, hash, address || null, city || null, state || null, zip || null, notes || null, total_orders || 0, total_spent || 0]
     );
 
     res.status(201).json(result.rows[0]);
@@ -169,7 +171,7 @@ router.get('/admin/customers/:id', async (req, res) => {
     const { id } = req.params;
 
     const result = await db.query(
-      'SELECT id, name, email, phone, cpf, address, city, state, zip, notes, created_at FROM users WHERE id=$1',
+      'SELECT id, name, email, phone, cpf, address, city, state, zip, notes, total_orders, total_spent, created_at FROM users WHERE id=$1',
       [id]
     );
 
@@ -188,7 +190,7 @@ router.get('/admin/customers/:id', async (req, res) => {
 router.put('/admin/customers/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, email, phone, cpf, address, city, state, zip, notes } = req.body;
+    const { name, email, phone, cpf, address, city, state, zip, notes, total_orders, total_spent } = req.body;
 
     if (!name) {
       return res.status(400).json({ error: 'Nome é obrigatório' });
@@ -196,10 +198,10 @@ router.put('/admin/customers/:id', async (req, res) => {
 
     const result = await db.query(
       `UPDATE users 
-       SET name=$1, email=$2, phone=$3, cpf=$4, address=$5, city=$6, state=$7, zip=$8, notes=$9
-       WHERE id=$10
-       RETURNING id, name, email, phone, cpf, address, city, state, zip, notes, created_at`,
-      [name, email || null, phone || null, cpf || null, address || null, city || null, state || null, zip || null, notes || null, id]
+       SET name=$1, email=$2, phone=$3, cpf=$4, address=$5, city=$6, state=$7, zip=$8, notes=$9, total_orders=$10, total_spent=$11
+       WHERE id=$12
+       RETURNING id, name, email, phone, cpf, address, city, state, zip, notes, total_orders, total_spent, created_at`,
+      [name, email || null, phone || null, cpf || null, address || null, city || null, state || null, zip || null, notes || null, total_orders || 0, total_spent || 0, id]
     );
 
     if (result.rowCount === 0) {
