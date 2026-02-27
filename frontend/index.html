@@ -519,8 +519,8 @@ function submitOrderWithCardPayment() {
       frete: 0,
       total: total,
       payment: 'Cartão',
-      status: 'Confirmado',
-      paymentStatus: 'Aprovado'
+      status: 'Pendente',
+      paymentStatus: 'Pendente'
     };
 
     fetch(API_URL + '/orders', {
@@ -569,6 +569,10 @@ function showOrderSuccess(orderId, whatsappMsg) {
   var body = document.getElementById('checkoutBody');
   if (!body) return;
 
+  var safeMsg = whatsappMsg
+    .replace(/'/g, '&#39;')
+    .replace(/\n/g, '\\n');
+
   var successHtml = 
     '<div style="text-align: center; padding: 40px 20px;">' +
       '<div style="font-size: 48px; margin-bottom: 20px;">✓</div>' +
@@ -578,7 +582,7 @@ function showOrderSuccess(orderId, whatsappMsg) {
         '<p style="font-size: 32px; font-weight: 900; color: var(--vermelho);">#' + orderId + '</p>' +
       '</div>' +
       '<p style="color: #666; font-size: 14px; margin-bottom: 20px;"><em>Guarde este número para acompanhar seu pedido</em></p>' +
-      '<button onclick="sendOrderViaWhatsapp(\'' + whatsappMsg.replace(/'/g, '&#39;') + '\')" style="width: 100%; background: #25D366; color: white; border: none; padding: 16px; font-weight: 900; cursor: pointer; border-radius: 4px; font-size: 16px; letter-spacing: 1px; margin-bottom: 12px;">📱 Enviar Pedido pelo WhatsApp</button>' +
+      '<button onclick="sendOrderViaWhatsapp(\'' + safeMsg + '\')" style="width: 100%; background: #25D366; color: white; border: none; padding: 16px; font-weight: 900; cursor: pointer; border-radius: 4px; font-size: 16px; letter-spacing: 1px; margin-bottom: 12px;">📱 Enviar Pedido pelo WhatsApp</button>' +
       '<p style="color: #999; font-size: 12px; margin-bottom: 12px;">(Opcional - para reforçar o pedido)</p>' +
       '<button onclick="finishCheckout()" style="width: 100%; background: var(--marrom); color: white; border: none; padding: 16px; font-weight: 700; cursor: pointer; border-radius: 4px; font-size: 16px; letter-spacing: 1px;">Finalizar</button>' +
     '</div>';
